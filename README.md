@@ -10,7 +10,9 @@ This bot watches recent tweets that mentions any publicly traded companies. When
 
 ## 🤔 What is '_Tweet2Stock_'?
 
-This project was created for the HackUIowa event, where 
+This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
+
+HackUIowa is a 2 day non-stop hackathon, and it will be held at University of Iowa in the heart of downtown Iowa City, USA. The event is open to all university students that have a passion for creating things with technology!
 
 The code is written in Python and is meant to run on a
 [Google Compute Engine](https://cloud.google.com/compute/) instance. It uses the
