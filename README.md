@@ -14,6 +14,8 @@ This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/
 
 HackUIowa is a 2 day non-stop hackathon, and it will be held at University of Iowa in the heart of downtown Iowa City, USA. The event is open to all university students that have a passion for creating things with technology!
 
+## Technologies
+
 The code is written in Python and its entity detection and sentiment analysis is
 done using Google's [Cloud Natural Language API](https://cloud.google.com/natural-language/) and the
 [Wikidata Query Service](https://query.wikidata.org/) provides the company data.
