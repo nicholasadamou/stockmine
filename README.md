@@ -8,7 +8,7 @@ This python program that analyzes recent tweets that mentions any publicly trade
 
 ---
 
-## 🤔 What is '_Tweet2Stock_'?
+## 🤔 Why make '_Tweet2Stock_'?
 
 This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
 
