@@ -2,7 +2,7 @@
 
 This python program that analyzes recent tweets that mentions any publicly traded companies and lunches a sentiment analysis to determine whether the aggregate opinion of the company in question is positive or negative.
 
-![HackUIowa 2019](https://img.shields.io/badge/hackathon-Intern%20HackUIowa%202019-yellow)
+![HackUIowa 2019](https://img.shields.io/badge/hackathon-HackUIowa%202019-yellow)
 ![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)
 ![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)
 
