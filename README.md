@@ -60,7 +60,7 @@ $ pip install -r requirements.txt
 ### 3. Run the program
 
 ```shell script
-python3 tweet2stock.py
+python3 tweet2stocks.py
 ```
 
 ## License
