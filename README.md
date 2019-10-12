@@ -1,6 +1,6 @@
 # Tweet2Stock
 
-This bot watches recent tweets that mentions any publicly traded companies. When someone does, it uses sentiment analysis to determine whether the aggregate opinion is positive or negative toward those companies. The bot then automatically executes trades on the relevant stocks according to the expected market reaction. It also tweets out a summary of its findings in real time at [@Tweet2Stock](https://twitter.com/Tweet2Stock).
+This python program that analyzes recent tweets that mentions any publicly traded companies and lunches a sentiment analysis to determine whether the aggregate opinion of the company in question is positive or negative.
 
 ![HackUIowa 2019](https://img.shields.io/badge/hackathon-Intern%20HackUIowa%202019-yellow)
 ![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)
@@ -14,14 +14,9 @@ This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/
 
 HackUIowa is a 2 day non-stop hackathon, and it will be held at University of Iowa in the heart of downtown Iowa City, USA. The event is open to all university students that have a passion for creating things with technology!
 
-The code is written in Python and is meant to run on a
-[Google Compute Engine](https://cloud.google.com/compute/) instance. It uses the
-[Twitter Streaming APIs](https://dev.twitter.com/streaming/overview) to get
-notified whenever someone tweets. The entity detection and sentiment analysis is
-done using Google's
-[Cloud Natural Language API](https://cloud.google.com/natural-language/) and the
+The code is written in Python and its entity detection and sentiment analysis is
+done using Google's [Cloud Natural Language API](https://cloud.google.com/natural-language/) and the
 [Wikidata Query Service](https://query.wikidata.org/) provides the company data.
-The [TradeKing API](https://developers.tradeking.com/) does the stock trading.
 
 Follow these steps to run the code yourself:
 
@@ -60,6 +55,12 @@ There are a few library dependencies, which you can install using
 
 ```shell
 $ pip install -r requirements.txt
+```
+
+### 3. Run the program
+
+```shell script
+python3 tweet2stock.py
 ```
 
 ## License

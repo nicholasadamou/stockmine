@@ -58,12 +58,12 @@ class Analysis:
         """Finds mentions of companies in a tweet."""
 
         if not tweet:
-            print("No tweet to find companies.")
+            # print("No tweet to find companies.")
             return None
 
         text = tweet.text
         if not text:
-            print("Failed to get text from tweet: %s" % tweet)
+            # print("Failed to get text from tweet: %s" % tweet)
             return None
 
         # Run entity detection.
@@ -72,13 +72,12 @@ class Analysis:
             type=language.enums.Document.Type.PLAIN_TEXT,
             language="en")
         entities = self.language_client.analyze_entities(document).entities
-        print("Found entities: %s" %
-                self.entities_tostring(entities))
+        # print("Found entities: %s" % self.entities_tostring(entities))
 
         # Collect all entities which are publicly traded companies, i.e.
         # entities which have a known stock ticker symbol.
         companies = []
-        print("companies: %s" % findall(r"\$[A-Z]{1,4}", text))
+       # print("companies: %s" % findall(r"\$[A-Z]{1,4}", text))
 
         for entity in entities:
 
@@ -98,28 +97,30 @@ class Analysis:
 
             # Skip any entity for which we can't find any company data.
             if not company_data:
-                if name and mid:
-                    print("No company data found for entity: %s (%s)" % (name, mid))
+                # if name and mid:
+                    # print("No company data found for entity: %s (%s)" % (name, mid))
                 continue
-            print("Found company data: %s" % company_data)
+            # print("Found company data: %s" % company_data)
 
             for company in company_data:
                 # Extract and add a sentiment score.
                 sentiment = self.get_sentiment(text)
-                print("Using sentiment for company: %s %s" %
-                      (sentiment, company))
+                # print("Using sentiment for company: %s %s" % (sentiment, company))
                 company["sentiment"] = sentiment
+                company["tweet"] = text
+                company["url"] = self.twitter.get_tweet_link(tweet)
 
                 # Add the company to the list unless we already have the same
                 # name, ticker, and that its not from the NASDAQ.
                 names = [existing["name"] for existing in companies]
                 tickers = [existing["ticker"] for existing in companies]
                 if not company["name"] in names \
-                    and not company["ticker"] in tickers \
-                    and company["exchange"] == "NASDAQ":
+                    and not company["ticker"] in tickers:
                     companies.append(company)
-                else:
-                    print("Skipping company with duplicate name and ticker: %s" % company)
+                # else:
+                    # print("Skipping company with duplicate name and ticker: %s" % company)
+
+                break
 
         return companies
 
@@ -131,8 +132,8 @@ class Analysis:
         bindings = self.make_wikidata_request(query)
 
         if not bindings:
-            if mid:
-                print("No company data found for MID: %s" % mid)
+            # if mid:
+            #    print("No company data found for MID: %s" % mid)
             return None
 
         # Collect the data from the response.
@@ -168,10 +169,10 @@ class Analysis:
 
             # Add to the list unless we already have the same entry.
             if company not in companies:
-                print("Adding company data: %s" % company)
+                # print("Adding company data: %s" % company)
                 companies.append(company)
-            else:
-                print("Skipping duplicate company data: %s" % company)
+            # else:
+                # print("Skipping duplicate company data: %s" % company)
 
         return companies
 
@@ -179,22 +180,22 @@ class Analysis:
         """Makes a request to the Wikidata SPARQL API."""
 
         query_url = WIKIDATA_QUERY_URL % quote_plus(query)
-        print("Wikidata query: %s" % query_url)
+        # print("Wikidata query: %s" % query_url)
 
         response = get(query_url)
 
         try:
             response_json = response.json()
         except ValueError:
-            print("Failed to decode JSON response: %s" % response)
+        #    print("Failed to decode JSON response: %s" % response)
             return None
-        print("Wikidata response: %s" % response_json)
+        # print("Wikidata response: %s" % response_json)
 
         try:
             results = response_json["results"]
             bindings = results["bindings"]
         except KeyError:
-            print("Malformed Wikidata response: %s" % response_json)
+            # print("Malformed Wikidata response: %s" % response_json)
             return None
 
         return bindings
@@ -227,7 +228,7 @@ class Analysis:
         """Extracts a sentiment score [-1, 1] from text."""
 
         if not text:
-            print("No sentiment for empty text.")
+            # print("No sentiment for empty text.")
             return 0
 
         document = language.types.Document(
@@ -237,8 +238,6 @@ class Analysis:
         sentiment = self.language_client.analyze_sentiment(
             document).document_sentiment
 
-        print(
-            "Sentiment score and magnitude for text: %s %s \"%s\"" %
-            (sentiment.score, sentiment.magnitude, text))
+        # print("Sentiment score and magnitude for text: %s %s \"%s\"" % (sentiment.score, sentiment.magnitude, text))
 
         return sentiment.score
