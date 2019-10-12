@@ -34,12 +34,12 @@ class Twitter:
         self.twitter_api = API(auth_handler=self.twitter_auth)
 
     def search(self, company, number):
-        """Returns a dictionary of tweets (user:tweet) containing a company's ticker-symbol"""
+        """Returns a list of tweets (tweet) containing a company's ticker-symbol"""
 
-        tweets = {}
+        tweets = []
 
         for tweet in self.twitter_api.search(q=company, lang="en", count=number, result_type="mixed"):
-            tweets[tweet.user.name] = tweet
+            tweets.append(tweet)
 
         return tweets
 

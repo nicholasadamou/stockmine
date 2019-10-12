@@ -1,6 +1,7 @@
 from google.cloud import language
 from re import compile
 from re import IGNORECASE
+from re import findall
 from urllib.parse import quote_plus
 from requests import get
 
@@ -53,6 +54,75 @@ class Analysis:
         self.language_client = language.LanguageServiceClient()
         self.twitter = Twitter()
 
+    def find_companies(self, tweet):
+        """Finds mentions of companies in a tweet."""
+
+        if not tweet:
+            print("No tweet to find companies.")
+            return None
+
+        text = tweet.text
+        if not text:
+            print("Failed to get text from tweet: %s" % tweet)
+            return None
+
+        # Run entity detection.
+        document = language.types.Document(
+            content=text,
+            type=language.enums.Document.Type.PLAIN_TEXT,
+            language="en")
+        entities = self.language_client.analyze_entities(document).entities
+        print("Found entities: %s" %
+                self.entities_tostring(entities))
+
+        # Collect all entities which are publicly traded companies, i.e.
+        # entities which have a known stock ticker symbol.
+        companies = []
+        print("companies: %s" % findall(r"\$[A-Z]{1,4}", text))
+
+        for entity in entities:
+
+            # Use the Freebase ID of the entity to find company data. Skip any
+            # entity which doesn't have a Freebase ID (unless we find one via
+            # the Twitter handle).
+            name = entity.name
+            metadata = entity.metadata
+            try:
+                mid = metadata["mid"]
+            except KeyError:
+                if name:
+                    print("No MID found for entity: %s" % name)
+                continue
+
+            company_data = self.get_company_data(mid)
+
+            # Skip any entity for which we can't find any company data.
+            if not company_data:
+                if name and mid:
+                    print("No company data found for entity: %s (%s)" % (name, mid))
+                continue
+            print("Found company data: %s" % company_data)
+
+            for company in company_data:
+                # Extract and add a sentiment score.
+                sentiment = self.get_sentiment(text)
+                print("Using sentiment for company: %s %s" %
+                      (sentiment, company))
+                company["sentiment"] = sentiment
+
+                # Add the company to the list unless we already have the same
+                # name, ticker, and that its not from the NASDAQ.
+                names = [existing["name"] for existing in companies]
+                tickers = [existing["ticker"] for existing in companies]
+                if not company["name"] in names \
+                    and not company["ticker"] in tickers \
+                    and company["exchange"] == "NASDAQ":
+                    companies.append(company)
+                else:
+                    print("Skipping company with duplicate name and ticker: %s" % company)
+
+        return companies
+
     def get_company_data(self, mid):
         """Looks up stock ticker information for a company via its Freebase ID.
         """
@@ -61,7 +131,8 @@ class Analysis:
         bindings = self.make_wikidata_request(query)
 
         if not bindings:
-            print("No company data found for MID: %s" % mid)
+            if mid:
+                print("No company data found for MID: %s" % mid)
             return None
 
         # Collect the data from the response.
@@ -88,8 +159,8 @@ class Analysis:
                 exchange = None
 
             company = {"name": name,
-                    "ticker": ticker,
-                    "exchange": exchange}
+                       "ticker": ticker,
+                       "exchange": exchange}
 
             # Add the root if there is one.
             if root and root != name:
@@ -103,111 +174,6 @@ class Analysis:
                 print("Skipping duplicate company data: %s" % company)
 
         return companies
-
-    def find_companies(self, tweet):
-        """Finds mentions of companies in a tweet."""
-
-        if not tweet:
-            print("No tweet to find companies.")
-            return None
-
-        # Use the text of the tweet with any mentions expanded to improve
-        # entity detection.
-        text = tweet.text
-        if not text:
-            print("Failed to get text from tweet: %s" % tweet)
-            return None
-
-        # Run entity detection.
-        document = language.types.Document(
-            content=text,
-            type=language.enums.Document.Type.PLAIN_TEXT,
-            language="en")
-        entities = self.language_client.analyze_entities(document).entities
-        print("Found entities: %s" %
-                        self.entities_tostring(entities))
-
-        # Collect all entities which are publicly traded companies, i.e.
-        # entities which have a known stock ticker symbol.
-        companies = []
-        for entity in entities:
-
-            # Use the Freebase ID of the entity to find company data. Skip any
-            # entity which doesn't have a Freebase ID (unless we find one via
-            # the Twitter handle).
-            name = entity.name
-            metadata = entity.metadata
-            try:
-                mid = metadata["mid"]
-            except KeyError:
-                print("No MID found for entity: %s" % name)
-                continue
-
-            company_data = self.get_company_data(mid)
-
-            # Skip any entity for which we can't find any company data.
-            if not company_data:
-                print("No company data found for entity: %s (%s)" %
-                                (name, mid))
-                continue
-            print("Found company data: %s" % company_data)
-
-            for company in company_data:
-
-                # Extract and add a sentiment score.
-                sentiment = self.get_sentiment(text)
-                print("Using sentiment for company: %s %s" %
-                                (sentiment, company))
-                company["sentiment"] = sentiment
-
-                # Add the company to the list unless we already have the same
-                # ticker.
-                tickers = [existing["ticker"] for existing in companies]
-                if not company["ticker"] in tickers:
-                    companies.append(company)
-                else:
-                    print("Skipping company with duplicate ticker: %s" % company)
-
-        return companies
-
-    def get_expanded_text(self, tweet):
-        """Retrieves the text from a tweet with any @mentions expanded to
-        their full names.
-        """
-
-        if not tweet:
-            print("No tweet to expand text.")
-            return None
-
-        try:
-            text = self.twitter.get_tweet_text(tweet)
-            mentions = tweet["entities"]["user_mentions"]
-        except KeyError:
-            print("Malformed tweet: %s" % tweet)
-            return None
-
-        if not text:
-            print("Empty text.")
-            return None
-
-        if not mentions:
-            print("No mentions.")
-            return text
-
-        print("Using mentions: %s" % mentions)
-        for mention in mentions:
-            try:
-                screen_name = "@%s" % mention["screen_name"]
-                name = mention["name"]
-            except KeyError:
-                print("Malformed mention: %s" % mention)
-                continue
-
-            print("Expanding mention: %s %s" % (screen_name, name))
-            pattern = compile(screen_name, IGNORECASE)
-            text = pattern.sub(name, text)
-
-        return text
 
     def make_wikidata_request(self, query):
         """Makes a request to the Wikidata SPARQL API."""
