@@ -1,4 +1,4 @@
-# Tweet2Stock
+![logo](logo.png)
 
 This python program that analyzes recent tweets that mentions any publicly traded companies and lunches a sentiment analysis to determine whether the aggregate opinion of the company in question is positive or negative.
 
