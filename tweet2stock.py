@@ -4,7 +4,7 @@ if __name__ == "__main__":
     analysis = Analysis()
 
     # Print banner and app description
-    print(('-' * 20) + "Tweet2Stock" + ("-" * 20))
+    print(('-' * 20) + "Tweet2Stocks" + ("-" * 20))
     print("This python program that analyzes recent tweets that mentions\nany publicly traded companies and lunches a "
           "sentiment analysis\nto determine whether the aggregate opinion of the company in\nquestion is positive or "
           "negative.\n")

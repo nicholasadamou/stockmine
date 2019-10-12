@@ -9,7 +9,7 @@ dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 read_dotenv(dotenv_path)
 
 # The keys for the Twitter account we're using for API requests and tweeting
-# alerts (@Tweet2Stock). Read from environment variables.
+# alerts (@Tweet2Stocks). Read from environment variables.
 TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
