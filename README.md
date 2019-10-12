@@ -1,6 +1,6 @@
 # StockBird
 
-This bot watches recent tweets that mentions any publicly traded companies. When someone does, it uses sentiment analysis to determine whether the aggregate opinion is positive or negative toward those companies. The bot then automatically executes trades on the relevant stocks according to the expected market reaction. It also tweets out a summary of its findings in real time at @StockBird.
+This bot watches recent tweets that mentions any publicly traded companies. When someone does, it uses sentiment analysis to determine whether the aggregate opinion is positive or negative toward those companies. The bot then automatically executes trades on the relevant stocks according to the expected market reaction. It also tweets out a summary of its findings in real time at [@StockBird](https://twitter.com/Stockbird).
 
 ![HackUIowa 2019](https://img.shields.io/badge/hackathon-Intern%20HackUIowa%202019-yellow)
 ![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)
