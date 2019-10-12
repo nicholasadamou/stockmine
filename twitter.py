@@ -33,7 +33,7 @@ class Twitter:
     def search(self, company, number):
         tweets = {}
 
-        for tweet in self.twitter_api.search(q=company, lang="en", rpp=number):
+        for tweet in self.twitter_api.search(q=company, lang="en", count=number, result_type="mixed"):
             tweets[tweet.user.name] = tweet.text
 
         return tweets

@@ -1,5 +1,8 @@
 from twitter import Twitter
 
-t = Twitter()
-tweets = t.search("APPL", 10)
-print(tweets)
+if __name__ == "__main__":
+    twitter = Twitter()
+
+    tweets = twitter.search("APPL", 1000)
+
+    print(tweets)
