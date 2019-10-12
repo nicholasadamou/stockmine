@@ -18,17 +18,7 @@ done using Google's
 The [TradeKing API](https://developers.tradeking.com/) does the stock trading.
 
 The [`main`](main.py) module defines a callback where incoming tweets are
-handled and starts streaming its feed:
-
-```python
-def twitter_callback(tweet):
-    companies = analysis.find_companies(tweet)
-    if companies:
-        trading.make_trades(companies)
-        twitter.tweet(companies, tweet)
-if __name__ == "__main__":
-    twitter.start_streaming(twitter_callback)
-```
+handled and starts service.
 
 The core algorithms are implemented in the [`analysis`](analysis.py) and
 [`trading`](trading.py) modules. The former finds mentions of companies in the
