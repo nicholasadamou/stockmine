@@ -8,10 +8,14 @@ This bot watches recent tweets that mentions any publicly traded companies. When
 
 ---
 
+## 🤔 What is '_Stockbird_'?
+
+This project was created for the HackUIowa event, where 
+
 The code is written in Python and is meant to run on a
 [Google Compute Engine](https://cloud.google.com/compute/) instance. It uses the
 [Twitter Streaming APIs](https://dev.twitter.com/streaming/overview) to get
-notified whenever Trump tweets. The entity detection and sentiment analysis is
+notified whenever someone tweets. The entity detection and sentiment analysis is
 done using Google's
 [Cloud Natural Language API](https://cloud.google.com/natural-language/) and the
 [Wikidata Query Service](https://query.wikidata.org/) provides the company data.
