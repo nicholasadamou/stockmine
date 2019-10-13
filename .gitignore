@@ -92,5 +92,5 @@ ENV/
 .vscode
 
 # misc.
-*.json
-*.csv
+API/*
+dist/

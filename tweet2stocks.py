@@ -5,7 +5,7 @@ from pyfiglet import Figlet
 
 from logs import *
 from anaylsis import Analysis, write2csv
-from twitter import get_tweet_link
+from twitter import get_tweet_link, compile_opinion_text
 
 if __name__ == "__main__":
     analysis = Analysis()
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         link = get_tweet_link(tweet)
 
         # Should we invest in $TICKER?
-        opinions = twitter.compile_opinion_text(results)
+        opinions = compile_opinion_text(results)
 
         # Add 'opinion' to results.
         for company in results:

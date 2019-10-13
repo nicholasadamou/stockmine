@@ -109,9 +109,9 @@ def entities_tostring(entities):
 def write2csv(ticker, results):
     file_name = ticker + "_" + date.today().strftime("%d-%m-%Y") + ".csv"
 
-    print('\n%s Writing results to %s' % (WARNING, file_name))
+    print('\n%s Writing results to dist/%s' % (WARNING, file_name))
 
-    f = csv.writer(open(file_name, "w"))
+    f = csv.writer(open('dist/' + file_name, "w"))
 
     header = ['ticker', 'name', 'sentiment', 'opinion', 'tweet', 'url']
     f.writerow(header)
