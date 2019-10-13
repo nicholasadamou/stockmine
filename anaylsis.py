@@ -193,6 +193,11 @@ class Analysis:
             print("%s Failed to get text from tweet: %s" % (WARNING, tweet))
             return None
 
+        if len(findall(r"\$[A-Z]{1,4}", text)) > 0:
+            print("%s companies: %s" % (OK, findall(r"\$[A-Z]{1,4}", text)))
+        else:
+            return None
+
         # Run entity detection.
         document = language.types.Document(
             content=text,
@@ -204,7 +209,6 @@ class Analysis:
         # Collect all entities which are publicly traded companies, i.e.
         # entities which have a known stock ticker symbol.
         results = []
-        print("%s companies: %s" % (OK, findall(r"\$[A-Z]{1,4}", text)))
 
         for entity in entities:
 
@@ -266,6 +270,6 @@ class Analysis:
             document).document_sentiment
 
         print("%s Sentiment score and magnitude for text: %s %s \"%s\"" % (
-        OK, sentiment.score, sentiment.magnitude, text))
+            OK, sentiment.score, sentiment.magnitude, text))
 
         return sentiment.score

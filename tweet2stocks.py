@@ -34,16 +34,20 @@ if __name__ == "__main__":
 
     print()
 
+    print("%s Analyzing %s tweet(s) for mentions of %s" % (WARNING, numberOfTweets, ticker))
+    print()
+
     # Get tweets pertaining to a given company.
     tweets = analysis.twitter.search(ticker, numberOfTweets)
-
-    print("%s Analyzing [%s]" % (WARNING, ticker))
-    print()
 
     data = []
     for tweet in tweets:
         # Analyze a tweet & obtain its sentiment.
         results = analysis.obtain_results(tweet)
+
+        if not results:
+            print("%s Didn't find any mention to a known publicly traded company." % ERROR)
+            continue
 
         # Obtain tweets metadata.
         link = get_tweet_link(tweet)
@@ -56,16 +60,12 @@ if __name__ == "__main__":
             for i in range(len(opinions)):
                 opinion = opinions[i]
                 if "$" + company['ticker'] == re.findall(r'\$[A-Z]{1,4}', opinion)[0]:
-                    print("%s" % OK, "$" + company['ticker'], re.findall(r'\$[A-Z]{1,4}', opinion)[0])
                     company.update({'opinion': opinion})
+
+        print("%s %s" % (OK, results))
 
         # Add to results.
         data += results
-
-        if results:
-            print("%s %s" % (OK, results))
-        else:
-            print("%s Didn't find any companies." % ERROR)
 
         if len(tweets) > 1:
             print()

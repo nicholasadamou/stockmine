@@ -2,6 +2,8 @@ import os
 from os import getenv
 from py_dotenv import read_dotenv
 
+from re import findall
+
 from tweepy import OAuthHandler
 from tweepy import API
 
@@ -151,7 +153,9 @@ class Twitter:
         tweets = []
 
         for tweet in self.twitter_api.search(q=company, lang="en", count=number, result_type="mixed"):
-            tweets.append(tweet)
+            if len(findall(r'\$[A-Z]{1,4}', tweet.text)) > 0:
+                print("%s %s" % (OK, tweet.text))
+                tweets.append(tweet)
 
         return tweets
 
