@@ -1,6 +1,5 @@
 import inquirer
 import re
-from re import findall
 
 from anaylsis import Analysis
 
@@ -49,9 +48,10 @@ if __name__ == "__main__":
 
         # Add 'opinion' to results.
         for company in results:
-            for opinion in opinions:
-                if company['ticker'] == findall(r'\$[A-Z]{1-4}', opinion):
-                    print("[+]", company['ticker'], findall(r'\$[A-Z]{1-4}', opinion))
+            for i in range(len(opinions)):
+                opinion = opinions[i]
+                if "$" + company['ticker'] == re.findall(r'\$[A-Z]{4}', opinion)[0]:
+                    print("[+]", "$" + company['ticker'], re.findall(r'\$[A-Z]{4}', opinion)[0])
                     company.update({'opinion': opinion})
 
         # Add to results.
@@ -62,15 +62,10 @@ if __name__ == "__main__":
         else:
             print("[!] Didn't find any companies.")
 
-        if opinions:
-            print("[+] %s" % opinions)
-        else:
-            print("[!] No opinion was given for %s" % ticker)
-
         if len(tweets) > 1:
             print()
 
-    if data:
+    if data and opinions:
         # Write results to csv.
         analysis.write2csv(ticker, data)
 

@@ -245,7 +245,7 @@ class Analysis:
 
         return sentiment.score
 
-    def write2csv(self, ticker, companies):
+    def write2csv(self, ticker, results):
         file_name = ticker + "_" + date.today().strftime("%d-%m-%Y") + ".csv"
 
         print('\n[!] Writing results to %s' % file_name)
@@ -257,7 +257,9 @@ class Analysis:
         f.writerow(header)
 
         # print()
-        for company in companies:
-            # print([company['ticker'], company['name'], company['sentiment'], company['tweet'], company['url']])
-            f.writerow([company['ticker'], company['name'], company['sentiment'], company['tweet'], company['url']])
+        for company in results:
+            # print([company['ticker'], company['name'], company['sentiment'], company['opinion'], company['tweet'],
+            # company['url']])
+            f.writerow([company['ticker'], company['name'], company['sentiment'],
+                        company['opinion'], company['tweet'], company['url']])
 
