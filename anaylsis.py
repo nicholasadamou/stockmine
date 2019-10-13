@@ -113,7 +113,7 @@ def write2csv(ticker, results):
 
     f = csv.writer(open(file_name, "w"))
 
-    header = ['ticker', 'name', 'sentiment', 'opinion',  'tweet', 'url']
+    header = ['ticker', 'name', 'sentiment', 'opinion', 'tweet', 'url']
     f.writerow(header)
 
     for company in results:
@@ -130,7 +130,7 @@ def get_company_data(mid):
 
     if not bindings:
         if mid:
-           print("%s No company data found for MID: %s" % (WARNING, mid))
+            print("%s No company data found for MID: %s" % (WARNING, mid))
         return None
 
     # Collect the data from the response.
@@ -265,7 +265,7 @@ class Analysis:
         sentiment = self.language_client.analyze_sentiment(
             document).document_sentiment
 
-        print("%s Sentiment score and magnitude for text: %s %s \"%s\"" % (OK, sentiment.score, sentiment.magnitude, text))
+        print("%s Sentiment score and magnitude for text: %s %s \"%s\"" % (
+        OK, sentiment.score, sentiment.magnitude, text))
 
         return sentiment.score
-
