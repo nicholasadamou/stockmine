@@ -65,7 +65,7 @@ if __name__ == "__main__":
         if len(tweets) > 1:
             print()
 
-    if data and opinions:
+    if data:
         # Write results to csv.
         analysis.write2csv(ticker, data)
 
