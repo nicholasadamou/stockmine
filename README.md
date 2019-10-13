@@ -45,10 +45,24 @@ you want to tweet from a different account, follow the
 [steps to obtain an access token](https://dev.twitter.com/oauth/overview). Then
 export both to environment variables:
 
+
 ```shell
 export TWITTER_ACCESS_TOKEN="<YOUR_ACCESS_TOKEN>"
 export TWITTER_ACCESS_TOKEN_SECRET="<YOUR_ACCESS_TOKEN_SECRET>"
 ```
+
+#### Google
+
+Follow the
+[Google Application Default Credentials instructions](https://developers.google.com/identity/protocols/application-default-credentials#howtheywork)
+to create, download, and export a service account key.
+
+```shell
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/credentials-file.json"
+```
+
+You also need to [enable the Cloud Natural Language API](https://cloud.google.com/natural-language/docs/getting-started#set_up_your_project)
+for your Google Cloud Platform project.
 
 ### 2. Install dependencies
 
