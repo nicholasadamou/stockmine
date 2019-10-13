@@ -2,6 +2,9 @@ from google.cloud import language
 from re import compile
 from re import IGNORECASE
 from re import findall
+import json
+import csv
+from datetime import date
 from urllib.parse import quote_plus
 from requests import get
 
@@ -54,8 +57,8 @@ class Analysis:
         self.language_client = language.LanguageServiceClient()
         self.twitter = Twitter()
 
-    def find_companies(self, tweet):
-        """Finds mentions of companies in a tweet."""
+    def obtain_results(self, tweet):
+        """Finds & analyzes mentions of companies in a tweet."""
 
         if not tweet:
             # print("No tweet to find companies.")
@@ -76,8 +79,8 @@ class Analysis:
 
         # Collect all entities which are publicly traded companies, i.e.
         # entities which have a known stock ticker symbol.
-        companies = []
-       # print("companies: %s" % findall(r"\$[A-Z]{1,4}", text))
+        results = []
+        # print("companies: %s" % findall(r"\$[A-Z]{1,4}", text))
 
         for entity in entities:
 
@@ -98,7 +101,7 @@ class Analysis:
             # Skip any entity for which we can't find any company data.
             if not company_data:
                 # if name and mid:
-                    # print("No company data found for entity: %s (%s)" % (name, mid))
+                # print("No company data found for entity: %s (%s)" % (name, mid))
                 continue
             # print("Found company data: %s" % company_data)
 
@@ -112,17 +115,17 @@ class Analysis:
 
                 # Add the company to the list unless we already have the same
                 # name, ticker, and that its not from the NASDAQ.
-                names = [existing["name"] for existing in companies]
-                tickers = [existing["ticker"] for existing in companies]
+                names = [existing["name"] for existing in results]
+                tickers = [existing["ticker"] for existing in results]
                 if not company["name"] in names \
                     and not company["ticker"] in tickers:
-                    companies.append(company)
+                    results.append(company)
                 # else:
-                    # print("Skipping company with duplicate name and ticker: %s" % company)
+                # print("Skipping company with duplicate name and ticker: %s" % company)
 
                 break
 
-        return companies
+        return results
 
     def get_company_data(self, mid):
         """Looks up stock ticker information for a company via its Freebase ID.
@@ -172,7 +175,7 @@ class Analysis:
                 # print("Adding company data: %s" % company)
                 companies.append(company)
             # else:
-                # print("Skipping duplicate company data: %s" % company)
+            # print("Skipping duplicate company data: %s" % company)
 
         return companies
 
@@ -187,7 +190,7 @@ class Analysis:
         try:
             response_json = response.json()
         except ValueError:
-        #    print("Failed to decode JSON response: %s" % response)
+            #    print("Failed to decode JSON response: %s" % response)
             return None
         # print("Wikidata response: %s" % response_json)
 
@@ -241,3 +244,20 @@ class Analysis:
         # print("Sentiment score and magnitude for text: %s %s \"%s\"" % (sentiment.score, sentiment.magnitude, text))
 
         return sentiment.score
+
+    def write2csv(self, ticker, companies):
+        file_name = ticker + "_" + date.today().strftime("%d-%m-%Y") + ".csv"
+
+        print('\n[!] Writing results to %s' % file_name)
+
+        f = csv.writer(open(file_name, "w"))
+
+        header = ['ticker', 'name', 'sentiment', 'opinion',  'tweet', 'url']
+        # print(header)
+        f.writerow(header)
+
+        # print()
+        for company in companies:
+            # print([company['ticker'], company['name'], company['sentiment'], company['tweet'], company['url']])
+            f.writerow([company['ticker'], company['name'], company['sentiment'], company['tweet'], company['url']])
+
