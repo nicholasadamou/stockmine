@@ -129,8 +129,8 @@ def get_company_data(mid):
     bindings = make_wikidata_request(query)
 
     if not bindings:
-        # if mid:
-        #    print("No company data found for MID: %s" % mid)
+        if mid:
+           print("%s No company data found for MID: %s" % (WARNING, mid))
         return None
 
     # Collect the data from the response.
@@ -166,7 +166,7 @@ def get_company_data(mid):
 
         # Add to the list unless we already have the same entry.
         if company not in companies:
-            # print("Adding company data: %s" % company)
+            print("%s Adding company data: %s" % (OK, company))
             companies.append(company)
         else:
             print("%s Skipping duplicate company data: %s" % (WARNING, company))
