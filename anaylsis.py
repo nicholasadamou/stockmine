@@ -114,13 +114,9 @@ def write2csv(ticker, results):
     f = csv.writer(open(file_name, "w"))
 
     header = ['ticker', 'name', 'sentiment', 'opinion',  'tweet', 'url']
-    # print(header)
     f.writerow(header)
 
-    # print()
     for company in results:
-        # print([company['ticker'], company['name'], company['sentiment'], company['opinion'], company['tweet'],
-        # company['url']])
         f.writerow([company['ticker'], company['name'], company['sentiment'],
                     company['opinion'], company['tweet'], company['url']])
 
