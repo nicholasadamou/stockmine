@@ -92,4 +92,4 @@ ENV/
 .vscode
 
 # misc.
-.json
+*.json
