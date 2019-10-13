@@ -80,6 +80,60 @@ def get_sentiment_emoji(sentiment):
     return EMOJI_SHRUG
 
 
+def compile_opinion_text(companies):
+    """Generates the text for a tweet."""
+
+    # Find all distinct company names.
+    names = []
+    for company in companies:
+        name = company["name"]
+        if name not in names:
+            names.append(name)
+
+    # Collect the ticker symbols and sentiment scores for each name.
+    tickers = {}
+    sentiments = {}
+    for name in names:
+        tickers[name] = []
+        for company in companies:
+            if company["name"] == name:
+                ticker = company["ticker"]
+                tickers[name].append(ticker)
+                sentiment = company["sentiment"]
+                # Assuming the same sentiment for each ticker.
+                sentiments[name] = sentiment
+
+    # Create lines for each name with sentiment emoji and ticker symbols.
+    lines = []
+    for name in names:
+        sentiment_str = get_sentiment_emoji(sentiments[name])
+        tickers_str = " ".join(["$%s" % t for t in tickers[name]])
+        line = "%s %s %s" % (name, sentiment_str, tickers_str)
+        lines.append(line)
+
+    return lines
+
+
+def make_tweet_text(results, link):
+    """Generates the text for a tweet."""
+
+    # Generate an opinion on the results.
+    opinions = compile_opinion_text(results)
+
+    # Combine the lines and eclipsing if necessary.
+    lines_str = "\n".join(opinions)
+    size = len(lines_str) + 1 + len(link)
+    if size > MAX_TWEET_SIZE:
+        print("%s Eclipsing lines: %s" % (WARNING, lines_str))
+        lines_size = MAX_TWEET_SIZE - len(link) - 2
+        lines_str = "%s\u2026" % lines_str[:lines_size]
+
+    # Combine the lines with the link.
+    text = "%s\n%s" % (lines_str, link)
+
+    return text
+
+
 class Twitter:
     """A helper for talking to Twitter APIs."""
 
@@ -100,58 +154,6 @@ class Twitter:
             tweets.append(tweet)
 
         return tweets
-
-    def compile_opinion_text(self, companies):
-        """Generates the text for a tweet."""
-
-        # Find all distinct company names.
-        names = []
-        for company in companies:
-            name = company["name"]
-            if name not in names:
-                names.append(name)
-
-        # Collect the ticker symbols and sentiment scores for each name.
-        tickers = {}
-        sentiments = {}
-        for name in names:
-            tickers[name] = []
-            for company in companies:
-                if company["name"] == name:
-                    ticker = company["ticker"]
-                    tickers[name].append(ticker)
-                    sentiment = company["sentiment"]
-                    # Assuming the same sentiment for each ticker.
-                    sentiments[name] = sentiment
-
-        # Create lines for each name with sentiment emoji and ticker symbols.
-        lines = []
-        for name in names:
-            sentiment_str = get_sentiment_emoji(sentiments[name])
-            tickers_str = " ".join(["$%s" % t for t in tickers[name]])
-            line = "%s %s %s" % (name, sentiment_str, tickers_str)
-            lines.append(line)
-
-        return lines
-
-    def make_tweet_text(self, results, link):
-        """Generates the text for a tweet."""
-
-        # Generate an opinion on the results.
-        opinions = self.compile_opinion_text(results)
-
-        # Combine the lines and eclipsing if necessary.
-        lines_str = "\n".join(opinions)
-        size = len(lines_str) + 1 + len(link)
-        if size > MAX_TWEET_SIZE:
-            print("%s Eclipsing lines: %s" % (WARNING, lines_str))
-            lines_size = MAX_TWEET_SIZE - len(link) - 2
-            lines_str = "%s\u2026" % lines_str[:lines_size]
-
-        # Combine the lines with the link.
-        text = "%s\n%s" % (lines_str, link)
-
-        return text
 
     def get_tweet(self, tweet_id):
         """Looks up metadata for a single tweet."""
