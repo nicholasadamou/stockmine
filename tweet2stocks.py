@@ -1,6 +1,8 @@
 import inquirer
 import re
 
+from pyfiglet import Figlet
+
 from logs import *
 from anaylsis import Analysis, write2csv
 from twitter import get_tweet_link
@@ -10,7 +12,8 @@ if __name__ == "__main__":
     twitter = analysis.twitter
 
     # Print banner and app description
-    print(('-' * 20) + "Tweet2Stocks" + ("-" * 20))
+    custom_fig = Figlet(font='shadow')
+    print(custom_fig.renderText('Tweet2Stocks'))
     print("This python program that analyzes recent tweets that mentions\nany publicly traded companies and lunches a "
           "sentiment analysis\nto determine whether the opinion of the company in\nquestion is positive or "
           "negative.\n")
