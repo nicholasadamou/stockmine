@@ -117,39 +117,14 @@ class Twitter:
 
         return lines
 
-    def make_tweet_text(self, companies, link):
+    def make_tweet_text(self, results, link):
         """Generates the text for a tweet."""
 
-        # Find all distinct company names.
-        names = []
-        for company in companies:
-            name = company["name"]
-            if name not in names:
-                names.append(name)
-
-        # Collect the ticker symbols and sentiment scores for each name.
-        tickers = {}
-        sentiments = {}
-        for name in names:
-            tickers[name] = []
-            for company in companies:
-                if company["name"] == name:
-                    ticker = company["ticker"]
-                    tickers[name].append(ticker)
-                    sentiment = company["sentiment"]
-                    # Assuming the same sentiment for each ticker.
-                    sentiments[name] = sentiment
-
-        # Create lines for each name with sentiment emoji and ticker symbols.
-        lines = []
-        for name in names:
-            sentiment_str = self.get_sentiment_emoji(sentiments[name])
-            tickers_str = " ".join(["$%s" % t for t in tickers[name]])
-            line = "%s %s %s" % (name, sentiment_str, tickers_str)
-            lines.append(line)
+        # Generate an opinion on the results.
+        opinions = self.compile_opinion_text(results)
 
         # Combine the lines and eclipsing if necessary.
-        lines_str = "\n".join(lines)
+        lines_str = "\n".join(opinions)
         size = len(lines_str) + 1 + len(link)
         if size > MAX_TWEET_SIZE:
             print("Eclipsing lines: %s" % lines_str)
