@@ -152,6 +152,7 @@ class Twitter:
 
         tweets = []
 
+        # query (q=) of '*' returns all tweets
         for tweet in self.twitter_api.search(q=company, lang="en", count=number, result_type="mixed"):
             if len(findall(r'\$[A-Z]{1,4}', tweet.text)) > 0:
                 print("%s %s" % (OK, tweet.text))
