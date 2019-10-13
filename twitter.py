@@ -5,6 +5,8 @@ from py_dotenv import read_dotenv
 from tweepy import OAuthHandler
 from tweepy import API
 
+from logs import *
+
 dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
 read_dotenv(dotenv_path)
 
@@ -30,6 +32,54 @@ EMOJI_SHRUG = "¯\\_(\u30c4)_/¯"
 MAX_TWEET_SIZE = 140
 
 
+def get_tweet_link(tweet):
+    """Creates the link URL to a tweet."""
+
+    if not tweet:
+        print("%s No tweet to get link." % WARNING)
+        return None
+
+    try:
+        screen_name = tweet.user.screen_name
+        id_str = tweet.id_str
+    except KeyError:
+        print("%s Malformed tweet for link: %s" % (ERROR, tweet))
+        return None
+
+    link = TWEET_URL % (screen_name, id_str)
+
+    return link
+
+
+def get_tweet_text(tweet):
+    """Returns the full text of a tweet."""
+
+    # The format for getting at the full text is different depending on
+    # whether the tweet came through the REST API or the Streaming API:
+    # https://dev.twitter.com/overview/api/upcoming-changes-to-tweets
+    try:
+        return tweet.text
+    except KeyError:
+        print("%s Malformed tweet: %s" % (ERROR, tweet))
+        return None
+
+
+def get_sentiment_emoji(sentiment):
+    """Returns the emoji matching the sentiment."""
+
+    if not sentiment:
+        return EMOJI_SHRUG
+
+    if sentiment > 0:
+        return EMOJI_THUMBS_UP
+
+    if sentiment < 0:
+        return EMOJI_THUMBS_DOWN
+
+    print("%s Unknown sentiment: %s" % (ERROR, sentiment))
+    return EMOJI_SHRUG
+
+
 class Twitter:
     """A helper for talking to Twitter APIs."""
 
@@ -50,39 +100,6 @@ class Twitter:
             tweets.append(tweet)
 
         return tweets
-
-    def get_tweet_text(self, tweet):
-        """Returns the full text of a tweet."""
-
-        # The format for getting at the full text is different depending on
-        # whether the tweet came through the REST API or the Streaming API:
-        # https://dev.twitter.com/overview/api/upcoming-changes-to-tweets
-        try:
-            # if tweet.text:
-                # print("Decoding short tweet.")
-
-            return tweet.text
-        except KeyError:
-            print("Malformed tweet: %s" % tweet)
-            return None
-
-    def get_tweet_link(self, tweet):
-        """Creates the link URL to a tweet."""
-
-        if not tweet:
-            # print("No tweet to get link.")
-            return None
-
-        try:
-            screen_name = tweet.user.screen_name
-            id_str = tweet.id_str
-        except KeyError:
-            # print("Malformed tweet for link: %s" % tweet)
-            return None
-
-        link = TWEET_URL % (screen_name, id_str)
-
-        return link
 
     def compile_opinion_text(self, companies):
         """Generates the text for a tweet."""
@@ -110,7 +127,7 @@ class Twitter:
         # Create lines for each name with sentiment emoji and ticker symbols.
         lines = []
         for name in names:
-            sentiment_str = self.get_sentiment_emoji(sentiments[name])
+            sentiment_str = get_sentiment_emoji(sentiments[name])
             tickers_str = " ".join(["$%s" % t for t in tickers[name]])
             line = "%s %s %s" % (name, sentiment_str, tickers_str)
             lines.append(line)
@@ -127,7 +144,7 @@ class Twitter:
         lines_str = "\n".join(opinions)
         size = len(lines_str) + 1 + len(link)
         if size > MAX_TWEET_SIZE:
-            print("Eclipsing lines: %s" % lines_str)
+            print("%s Eclipsing lines: %s" % (WARNING, lines_str))
             lines_size = MAX_TWEET_SIZE - len(link) - 2
             lines_str = "%s\u2026" % lines_str[:lines_size]
 
@@ -136,28 +153,13 @@ class Twitter:
 
         return text
 
-    def get_sentiment_emoji(self, sentiment):
-        """Returns the emoji matching the sentiment."""
-
-        if not sentiment:
-            return EMOJI_SHRUG
-
-        if sentiment > 0:
-            return EMOJI_THUMBS_UP
-
-        if sentiment < 0:
-            return EMOJI_THUMBS_DOWN
-
-        # print("Unknown sentiment: %s" % sentiment)
-        return EMOJI_SHRUG
-
     def get_tweet(self, tweet_id):
         """Looks up metadata for a single tweet."""
 
         # Use tweet_mode=extended so we get the full text.
         status = self.twitter_api.get_status(tweet_id, tweet_mode="extended")
         if not status:
-            # print("Bad status response: %s" % status)
+            print("%s Bad status response: %s" % (ERROR, status))
             return None
 
         # Use the raw JSON, just like the streaming API.

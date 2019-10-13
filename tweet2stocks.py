@@ -1,7 +1,9 @@
 import inquirer
 import re
 
-from anaylsis import Analysis
+from logs import *
+from anaylsis import Analysis, write2csv
+from twitter import get_tweet_link
 
 if __name__ == "__main__":
     analysis = Analysis()
@@ -16,7 +18,7 @@ if __name__ == "__main__":
     # Ask the user to enter a target Ticker Symbol (e.g. $AAPL)
     questions = [
         inquirer.Text('ticker', message="Enter a Ticker Symbol (e.g. $AAPL)",
-                      validate=lambda _, x: not re.match(r'\$[A-Z]{1-4}', x),
+                      validate=lambda _, x: re.match(r'\$[A-Z]{1,4}', x),
                       ),
         inquirer.Text('numberOfTweets', message="Enter a number of tweets to analyze"),
     ]
@@ -32,7 +34,7 @@ if __name__ == "__main__":
     # Get tweets pertaining to a given company.
     tweets = analysis.twitter.search(ticker, numberOfTweets)
 
-    print("[-] Analyzing [%s]" % ticker)
+    print("%s Analyzing [%s]" % (WARNING, ticker))
     print()
 
     data = []
@@ -41,7 +43,7 @@ if __name__ == "__main__":
         results = analysis.obtain_results(tweet)
 
         # Obtain tweets metadata.
-        link = twitter.get_tweet_link(tweet)
+        link = get_tweet_link(tweet)
 
         # Should we invest in $TICKER?
         opinions = twitter.compile_opinion_text(results)
@@ -50,23 +52,23 @@ if __name__ == "__main__":
         for company in results:
             for i in range(len(opinions)):
                 opinion = opinions[i]
-                if "$" + company['ticker'] == re.findall(r'\$[A-Z]{4}', opinion)[0]:
-                    print("[+]", "$" + company['ticker'], re.findall(r'\$[A-Z]{4}', opinion)[0])
+                if "$" + company['ticker'] == re.findall(r'\$[A-Z]{1,4}', opinion)[0]:
+                    print("%s" % OK, "$" + company['ticker'], re.findall(r'\$[A-Z]{1,4}', opinion)[0])
                     company.update({'opinion': opinion})
 
         # Add to results.
         data += results
 
         if results:
-            print("[+] %s", results)
+            print("%s %s" % (OK, results))
         else:
-            print("[!] Didn't find any companies.")
+            print("%s Didn't find any companies." % ERROR)
 
         if len(tweets) > 1:
             print()
 
     if data:
         # Write results to csv.
-        analysis.write2csv(ticker, data)
+        write2csv(ticker, data)
 
-    print("\n[!] Done")
+    print("\n%s Done" % SUCCESS)

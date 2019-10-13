@@ -1,14 +1,18 @@
-from google.cloud import language
-from re import compile
-from re import IGNORECASE
-from re import findall
-import json
 import csv
+
+from google.cloud import language
+
 from datetime import date
+
 from urllib.parse import quote_plus
+
 from requests import get
 
-from twitter import Twitter
+from re import findall
+
+from twitter import Twitter, get_tweet_link
+
+from logs import *
 
 # The URL for a GET request to the Wikidata API. The string parameter is the
 # SPARQL query.
@@ -50,6 +54,130 @@ MID_TO_TICKER_QUERY = (
     ' ORDER BY ?companyLabel ?rootLabel ?tickerLabel ?exchangeNameLabel')
 
 
+def make_wikidata_request(query):
+    """Makes a request to the Wikidata SPARQL API."""
+
+    query_url = WIKIDATA_QUERY_URL % quote_plus(query)
+    print("%s Wikidata query: %s" % (OK, query_url))
+
+    response = get(query_url)
+
+    try:
+        response_json = response.json()
+    except ValueError:
+        print("%s Failed to decode JSON response: %s" % (ERROR, response))
+        return None
+
+    print("%s Wikidata response: %s" % (OK, response_json))
+
+    try:
+        results = response_json["results"]
+        bindings = results["bindings"]
+    except KeyError:
+        print("%s Malformed Wikidata response: %s" % (ERROR, response_json))
+        return None
+
+    return bindings
+
+
+def entity_tostring(entity):
+    """Converts one entity to a readable string."""
+
+    metadata = ", ".join(['"%s": "%s"' % (key, value) for
+                          key, value in entity.metadata.items()])
+
+    mentions = ", ".join(['"%s"' % mention for mention in entity.mentions])
+
+    return ('{name: "%s",'
+            ' type: "%s",'
+            ' metadata: {%s},'
+            ' salience: %s,'
+            ' mentions: [%s]}') % (
+               entity.name,
+               entity.type,
+               metadata,
+               entity.salience,
+               mentions)
+
+
+def entities_tostring(entities):
+    """Converts a list of entities to a readable string."""
+
+    return "[%s]" % ", ".join([entity_tostring(entity) for entity in entities])
+
+
+def write2csv(ticker, results):
+    file_name = ticker + "_" + date.today().strftime("%d-%m-%Y") + ".csv"
+
+    print('\n%s Writing results to %s' % (WARNING, file_name))
+
+    f = csv.writer(open(file_name, "w"))
+
+    header = ['ticker', 'name', 'sentiment', 'opinion',  'tweet', 'url']
+    # print(header)
+    f.writerow(header)
+
+    # print()
+    for company in results:
+        # print([company['ticker'], company['name'], company['sentiment'], company['opinion'], company['tweet'],
+        # company['url']])
+        f.writerow([company['ticker'], company['name'], company['sentiment'],
+                    company['opinion'], company['tweet'], company['url']])
+
+
+def get_company_data(mid):
+    """Looks up stock ticker information for a company via its Freebase ID.
+    """
+
+    query = MID_TO_TICKER_QUERY % mid
+    bindings = make_wikidata_request(query)
+
+    if not bindings:
+        # if mid:
+        #    print("No company data found for MID: %s" % mid)
+        return None
+
+    # Collect the data from the response.
+    companies = []
+    for binding in bindings:
+        try:
+            name = binding["companyLabel"]["value"]
+        except KeyError:
+            name = None
+
+        try:
+            root = binding["rootLabel"]["value"]
+        except KeyError:
+            root = None
+
+        try:
+            ticker = binding["tickerLabel"]["value"]
+        except KeyError:
+            ticker = None
+
+        try:
+            exchange = binding["exchangeNameLabel"]["value"]
+        except KeyError:
+            exchange = None
+
+        company = {"name": name,
+                   "ticker": ticker,
+                   "exchange": exchange}
+
+        # Add the root if there is one.
+        if root and root != name:
+            company["root"] = root
+
+        # Add to the list unless we already have the same entry.
+        if company not in companies:
+            # print("Adding company data: %s" % company)
+            companies.append(company)
+        else:
+            print("%s Skipping duplicate company data: %s" % (WARNING, company))
+
+    return companies
+
+
 class Analysis:
     """A helper for analyzing company data in text."""
 
@@ -61,12 +189,12 @@ class Analysis:
         """Finds & analyzes mentions of companies in a tweet."""
 
         if not tweet:
-            # print("No tweet to find companies.")
+            print("%s No tweet to find companies." % WARNING)
             return None
 
         text = tweet.text
         if not text:
-            # print("Failed to get text from tweet: %s" % tweet)
+            print("%s Failed to get text from tweet: %s" % (WARNING, tweet))
             return None
 
         # Run entity detection.
@@ -75,12 +203,12 @@ class Analysis:
             type=language.enums.Document.Type.PLAIN_TEXT,
             language="en")
         entities = self.language_client.analyze_entities(document).entities
-        # print("Found entities: %s" % self.entities_tostring(entities))
+        print("%s Found entities: %s" % (OK, entities_tostring(entities)))
 
         # Collect all entities which are publicly traded companies, i.e.
         # entities which have a known stock ticker symbol.
         results = []
-        # print("companies: %s" % findall(r"\$[A-Z]{1,4}", text))
+        print("%s companies: %s" % (OK, findall(r"\$[A-Z]{1,4}", text)))
 
         for entity in entities:
 
@@ -96,14 +224,14 @@ class Analysis:
                     print("No MID found for entity: %s" % name)
                 continue
 
-            company_data = self.get_company_data(mid)
+            company_data = get_company_data(mid)
 
             # Skip any entity for which we can't find any company data.
             if not company_data:
-                # if name and mid:
-                # print("No company data found for entity: %s (%s)" % (name, mid))
+                if name and mid:
+                    print("%s No company data found for entity: %s (%s)" % (WARNING, name, mid))
                 continue
-            # print("Found company data: %s" % company_data)
+            print("%s Found company data: %s" % (OK, company_data))
 
             for company in company_data:
                 # Extract and add a sentiment score.
@@ -111,7 +239,7 @@ class Analysis:
                 # print("Using sentiment for company: %s %s" % (sentiment, company))
                 company["sentiment"] = sentiment
                 company["tweet"] = text
-                company["url"] = self.twitter.get_tweet_link(tweet)
+                company["url"] = get_tweet_link(tweet)
 
                 # Add the company to the list unless we already have the same
                 # name, ticker, and that its not from the NASDAQ.
@@ -120,118 +248,18 @@ class Analysis:
                 if not company["name"] in names \
                     and not company["ticker"] in tickers:
                     results.append(company)
-                # else:
-                # print("Skipping company with duplicate name and ticker: %s" % company)
+                else:
+                    print("%s Skipping company with duplicate name and ticker: %s" % (WARNING, company))
 
                 break
 
         return results
 
-    def get_company_data(self, mid):
-        """Looks up stock ticker information for a company via its Freebase ID.
-        """
-
-        query = MID_TO_TICKER_QUERY % mid
-        bindings = self.make_wikidata_request(query)
-
-        if not bindings:
-            # if mid:
-            #    print("No company data found for MID: %s" % mid)
-            return None
-
-        # Collect the data from the response.
-        companies = []
-        for binding in bindings:
-            try:
-                name = binding["companyLabel"]["value"]
-            except KeyError:
-                name = None
-
-            try:
-                root = binding["rootLabel"]["value"]
-            except KeyError:
-                root = None
-
-            try:
-                ticker = binding["tickerLabel"]["value"]
-            except KeyError:
-                ticker = None
-
-            try:
-                exchange = binding["exchangeNameLabel"]["value"]
-            except KeyError:
-                exchange = None
-
-            company = {"name": name,
-                       "ticker": ticker,
-                       "exchange": exchange}
-
-            # Add the root if there is one.
-            if root and root != name:
-                company["root"] = root
-
-            # Add to the list unless we already have the same entry.
-            if company not in companies:
-                # print("Adding company data: %s" % company)
-                companies.append(company)
-            # else:
-            # print("Skipping duplicate company data: %s" % company)
-
-        return companies
-
-    def make_wikidata_request(self, query):
-        """Makes a request to the Wikidata SPARQL API."""
-
-        query_url = WIKIDATA_QUERY_URL % quote_plus(query)
-        # print("Wikidata query: %s" % query_url)
-
-        response = get(query_url)
-
-        try:
-            response_json = response.json()
-        except ValueError:
-            #    print("Failed to decode JSON response: %s" % response)
-            return None
-        # print("Wikidata response: %s" % response_json)
-
-        try:
-            results = response_json["results"]
-            bindings = results["bindings"]
-        except KeyError:
-            # print("Malformed Wikidata response: %s" % response_json)
-            return None
-
-        return bindings
-
-    def entities_tostring(self, entities):
-        """Converts a list of entities to a readable string."""
-
-        return "[%s]" % ", ".join([self.entity_tostring(entity) for entity in entities])
-
-    def entity_tostring(self, entity):
-        """Converts one entity to a readable string."""
-
-        metadata = ", ".join(['"%s": "%s"' % (key, value) for
-                              key, value in entity.metadata.items()])
-
-        mentions = ", ".join(['"%s"' % mention for mention in entity.mentions])
-
-        return ('{name: "%s",'
-                ' type: "%s",'
-                ' metadata: {%s},'
-                ' salience: %s,'
-                ' mentions: [%s]}') % (
-                   entity.name,
-                   entity.type,
-                   metadata,
-                   entity.salience,
-                   mentions)
-
     def get_sentiment(self, text):
         """Extracts a sentiment score [-1, 1] from text."""
 
         if not text:
-            # print("No sentiment for empty text.")
+            print("%s No sentiment for empty text." % WARNING)
             return 0
 
         document = language.types.Document(
@@ -241,25 +269,7 @@ class Analysis:
         sentiment = self.language_client.analyze_sentiment(
             document).document_sentiment
 
-        # print("Sentiment score and magnitude for text: %s %s \"%s\"" % (sentiment.score, sentiment.magnitude, text))
+        print("%s Sentiment score and magnitude for text: %s %s \"%s\"" % (OK, sentiment.score, sentiment.magnitude, text))
 
         return sentiment.score
-
-    def write2csv(self, ticker, results):
-        file_name = ticker + "_" + date.today().strftime("%d-%m-%Y") + ".csv"
-
-        print('\n[!] Writing results to %s' % file_name)
-
-        f = csv.writer(open(file_name, "w"))
-
-        header = ['ticker', 'name', 'sentiment', 'opinion',  'tweet', 'url']
-        # print(header)
-        f.writerow(header)
-
-        # print()
-        for company in results:
-            # print([company['ticker'], company['name'], company['sentiment'], company['opinion'], company['tweet'],
-            # company['url']])
-            f.writerow([company['ticker'], company['name'], company['sentiment'],
-                        company['opinion'], company['tweet'], company['url']])
 
