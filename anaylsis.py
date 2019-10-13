@@ -232,7 +232,7 @@ class Analysis:
             for company in company_data:
                 # Extract and add a sentiment score.
                 sentiment = self.get_sentiment(text)
-                # print("Using sentiment for company: %s %s" % (sentiment, company))
+                print("%s Using sentiment for company: %s %s" % (WARNING, sentiment, company))
                 company["sentiment"] = sentiment
                 company["tweet"] = text
                 company["url"] = get_tweet_link(tweet)
