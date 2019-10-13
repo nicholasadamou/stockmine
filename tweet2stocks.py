@@ -70,6 +70,9 @@ if __name__ == "__main__":
         if len(tweets) > 1:
             print()
 
+    # Determine overall sentiment for each company found.
+    data = analysis.determine_net_setiment(data)
+
     if data:
         # Write results to csv.
         write2csv(ticker, data)

@@ -273,3 +273,19 @@ class Analysis:
             OK, sentiment.score, sentiment.magnitude, text))
 
         return sentiment.score
+
+    def determine_net_setiment(self, companies):
+        results = []
+        sentiments = {}
+
+        for company in companies:
+            sentiments[company['ticker']] = []
+
+        for company in companies:
+            sentiments[company['ticker']].append(company['sentiment'])
+
+        for company in sentiments:
+            net_sentiment = sum(sentiments[company]) / len(sentiments[company])
+            print('%s net sentiment for %s = %s' % (OK, company, net_sentiment))
+
+        return results
