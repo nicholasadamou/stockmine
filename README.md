@@ -10,9 +10,9 @@ Crowd-sourced stock analyzer and stock predictor using Google's [Cloud Natural L
 
 ## 🤔 Why make '_Stock Flight_'?
 
-This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
+This project was created for the 2019 [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
 
-HackUIowa is a 2 day non-stop hackathon, and it will be held at University of Iowa in the heart of downtown Iowa City, USA. The event is open to all university students that have a passion for creating things with technology!
+HackUIowa was a 2 day non-stop hackathon, and it was held at University of Iowa in the heart of downtown Iowa City, USA.2
 
 ## Technologies
 
