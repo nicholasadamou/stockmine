@@ -27,22 +27,6 @@ IS_PY3 = sys.version_info >= (3, 0)
 if IS_PY3:
     unicode = str
 
-HELP = """
-usage: stockflight.py [-h] [-k KEYWORDS] [-c COUNT] [-V]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -k KEYWORDS, --keywords KEYWORDS
-                        Use keywords to search for in Tweets instead of feeds.
-                        Separated by comma, case insensitive, spaces are ANDs
-                        commas are ORs. Example: TSLA,'Elon
-                        Musk',Musk,Tesla,SpaceX
-  -c COUNT, --count COUNT
-                        How many tweets to analyze
-                        (default: 120 sec)
-  -V, --version         Prints version and exits
-"""
-
 if __name__ == "__main__":
     # Print banner and app description
     custom_fig = Figlet(font='shadow')
