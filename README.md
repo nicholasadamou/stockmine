@@ -3,7 +3,7 @@
 Crowd-sourced stock analyzer and stock predictor using Google Natural Language Processing API, Twitter, and Wikidata Space Query Service in order to determine how much do emotions effect a stock price?
 
 ![HackUIowa 2019](https://img.shields.io/badge/hackathon-HackUIowa%202019-yellow)
-![License](https://img.shields.io/badge/license-Apache2.0-blue.svg?style=flat-square)
+[![License](https://img.shields.io/github/license/nicholasadamou/stockflight.svg?label=License&maxAge=86400)](./LICENSE)
 ![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)
 
 ---
