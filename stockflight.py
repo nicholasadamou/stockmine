@@ -9,8 +9,10 @@ Copyright (C) Nicholas Adamou 2019
 stockflight is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
-
+import argparse
 import os
+import sys
+
 import inquirer
 import re
 
@@ -19,6 +21,14 @@ from pyfiglet import Figlet
 
 from logs import *
 from anaylsis import Analysis, write2csv
+
+STOCKFLIGHT_VERSION = '0.1a'
+__version__ = STOCKFLIGHT_VERSION
+
+IS_PY3 = sys.version_info >= (3, 0)
+
+if IS_PY3:
+    unicode = str
 
 if __name__ == "__main__":
     # Print banner and app description
@@ -36,52 +46,50 @@ if __name__ == "__main__":
         print("\n%s .env does not exist. Please create the file & add the necessary API keys to it." % ERROR)
         exit(1)
 
+    # parse CLI arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-k", "--keywords", metavar="KEYWORDS",
+                        help="Use keywords to search for in Tweets instead of feeds. "
+                             "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
+                             "Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX")
+    parser.add_argument("--count", metavar="COUNT", default=120, type=int,
+                        help="How many tweets to analyze (default: 120)")
+    parser.add_argument("-V", "--version", action="version",
+                        version="stockflight v%s" % STOCKFLIGHT_VERSION,
+                        help="Prints version and exits")
+    args = parser.parse_args()
+
     analysis = Analysis()
 
-    # Ask the user to enter a target Ticker Symbol (e.g. $AAPL)
-    questions = [
-        inquirer.Text('ticker', message="Enter a Ticker Symbol (e.g. $AAPL)",
-                      validate=lambda _, x: re.match(r'\$[A-Z]{1,4}', x),
-                      ),
-        inquirer.Text('numberOfTweets', message="Enter a number of tweets to analyze"),
-    ]
+    if args.keywords:
+        print("%s Analyzing %s tweet(s) for mentions of %s\n" % (WARNING, args.count, args.keywords))
 
-    # Obtain user's response to questions
-    answers = inquirer.prompt(questions)
+        # Get tweets pertaining to a given company.
+        tweets = analysis.twitter.search(args.keywords, args.count)
 
-    ticker = answers['ticker']
-    numberOfTweets = answers['numberOfTweets']
+        data = []
+        for tweet in tweets:
+            # Find any mention of companies in tweet.
+            companies = analysis.find_companies(tweet)
 
-    print()
+            if not companies:
+                print("%s Didn't find any mention to any known publicly traded companies." % ERROR)
+                continue
 
-    print("%s Analyzing %s tweet(s) for mentions of %s" % (WARNING, numberOfTweets, ticker))
-    print()
+            # Analyze a tweet & obtain its sentiment.
+            results = analysis.analyze(companies)
 
-    # Get tweets pertaining to a given company.
-    tweets = analysis.twitter.search(ticker, numberOfTweets)
+            print("%s %s" % (OK, results))
 
-    data = []
-    for tweet in tweets:
-        # Find any mention of companies in tweet.
-        companies = analysis.find_companies(tweet)
+            # Add to results.
+            data += results
 
-        if not companies:
-            print("%s Didn't find any mention to any known publicly traded companies." % ERROR)
-            continue
+            # Prettify output.
+            if len(tweets) > 1:
+                print()
 
-        # Analyze a tweet & obtain its sentiment.
-        results = analysis.analyze(companies)
-
-        print("%s %s" % (OK, results))
-
-        # Add to results.
-        data += results
-
-        if len(tweets) > 1:
-            print()
-
-    if data:
-        # Write results to csv.
-        write2csv(data)
+        if data:
+            # Write results to csv.
+            write2csv(data)
 
     print("\n%s Done" % SUCCESS)

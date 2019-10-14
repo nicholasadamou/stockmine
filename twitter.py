@@ -77,16 +77,15 @@ class Twitter:
 
         self.twitter_api = API(auth_handler=self.twitter_auth)
 
-    def search(self, company, number):
-        """Returns a list of tweets (tweet) containing a company's ticker-symbol"""
+    def search(self, query, count):
+        """Returns a list of tweets (tweet) matching the query"""
 
         tweets = []
 
         # query (q=) of '*' returns all tweets
-        for tweet in self.twitter_api.search(q=company, lang="en", count=number, result_type="mixed"):
-            if len(findall(r'\$[A-Z]{1,4}', tweet.text)) > 0:
-                print("%s %s" % (OK, tweet.text))
-                tweets.append(tweet)
+        for tweet in self.twitter_api.search(q=query, lang="en", count=count, result_type="mixed"):
+            print("%s %s" % (OK, tweet.text))
+            tweets.append(tweet)
 
         return tweets
 
