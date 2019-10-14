@@ -61,7 +61,7 @@ if __name__ == "__main__":
 
     analysis = Analysis()
 
-    if args.keywords:
+    if args.keywords and args.count:
         print("%s Analyzing %s tweet(s) for mentions of %s\n" % (WARNING, args.count, args.keywords))
 
         # Get tweets pertaining to a given company.
