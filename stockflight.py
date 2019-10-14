@@ -13,9 +13,6 @@ import argparse
 import os
 import sys
 
-import inquirer
-import re
-
 from py_dotenv import read_dotenv
 from pyfiglet import Figlet
 
