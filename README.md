@@ -91,8 +91,7 @@ optional arguments:
   -k KEYWORDS, --keywords KEYWORDS
                         Use keywords to search for in Tweets instead of feeds.
                         Separated by comma, case insensitive, spaces are ANDs
-                        commas are ORs. Example: TSLA,'Elon
-                        Musk',Musk,Tesla,SpaceX
+                        commas are ORs. Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX
   -c COUNT, --count COUNT
                         How many tweets to analyze
                         (default: 120)
