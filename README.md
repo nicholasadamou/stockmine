@@ -81,6 +81,24 @@ Run `stockflight` to start mining and analyzing a given amount of tweets using k
 $ pythone3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla -c 500
 ```
 
+### CLI options
+
+```
+usage: stockflight.py [-h] [-k KEYWORDS] [-c COUNT] [-V]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -k KEYWORDS, --keywords KEYWORDS
+                        Use keywords to search for in Tweets instead of feeds.
+                        Separated by comma, case insensitive, spaces are ANDs
+                        commas are ORs. Example: TSLA,'Elon
+                        Musk',Musk,Tesla,SpaceX
+  -c COUNT, --count COUNT
+                        How many tweets to analyze
+                        (default: 120)
+  -V, --version         Prints version and exits
+  ```
+
 ## License
 
 Copyright 2019 Nicholas Adamou, Cole Horner, Angel Fabila

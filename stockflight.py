@@ -27,6 +27,22 @@ IS_PY3 = sys.version_info >= (3, 0)
 if IS_PY3:
     unicode = str
 
+HELP = """
+usage: stockflight.py [-h] [-k KEYWORDS] [-c COUNT] [-V]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -k KEYWORDS, --keywords KEYWORDS
+                        Use keywords to search for in Tweets instead of feeds.
+                        Separated by comma, case insensitive, spaces are ANDs
+                        commas are ORs. Example: TSLA,'Elon
+                        Musk',Musk,Tesla,SpaceX
+  -c COUNT, --count COUNT
+                        How many tweets to analyze
+                        (default: 120 sec)
+  -V, --version         Prints version and exits
+"""
+
 if __name__ == "__main__":
     # Print banner and app description
     custom_fig = Figlet(font='shadow')
@@ -49,11 +65,12 @@ if __name__ == "__main__":
                         help="Use keywords to search for in Tweets instead of feeds. "
                              "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
                              "Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX")
-    parser.add_argument("--count", metavar="COUNT", default=120, type=int,
+    parser.add_argument("-c", "--count", metavar="COUNT", default=120, type=int,
                         help="How many tweets to analyze (default: 120)")
     parser.add_argument("-V", "--version", action="version",
                         version="stockflight v%s" % STOCKFLIGHT_VERSION,
                         help="Prints version and exits")
+
     args = parser.parse_args()
 
     # Search for a given amount of tweets containing a list of keywords.
