@@ -78,7 +78,7 @@ $ pip install -r requirements.txt
 Run `stockflight` to start mining and analyzing a given amount of tweets using keywords.
 
 ```shell
-$ pythone3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla -c 500
+$ python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla -c 500
 ```
 
 ### CLI options
