@@ -56,10 +56,12 @@ if __name__ == "__main__":
                         help="Prints version and exits")
     args = parser.parse_args()
 
-    analysis = Analysis()
-
+    # Search for a given amount of tweets containing a list of keywords.
     if args.keywords and args.count:
         print("%s Analyzing %s tweet(s) for mentions of %s\n" % (WARNING, args.count, args.keywords))
+
+        # Start analysis.
+        analysis = Analysis()
 
         # Get tweets pertaining to a given company.
         tweets = analysis.twitter.search(args.keywords, args.count)
