@@ -164,7 +164,7 @@ class Analysis:
 
     def extract_sentiment(self, text):
         """Extracts a sentiment score [-1, 1] from text
-        using Google Natural Language Processing API."""
+        using Google Natural Language API."""
 
         if not text:
             print("%s No sentiment for empty text." % WARNING)
