@@ -8,7 +8,7 @@ Crowd-sourced stock analyzer and stock predictor using Google Natural Language P
 
 ---
 
-## 🤔 Why make '_StockFlight_'?
+## 🤔 Why make '_Stock Flight_'?
 
 This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
 
