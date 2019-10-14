@@ -34,7 +34,7 @@ if __name__ == "__main__":
     print("Crowd-sourced stock analyzer and stock predictor using\n"
           "Google Natural Language Processing API, Twitter, and\n"
           "Wikidata API in order to determine, if at all, how much\n"
-          "emotions can effect a stock price?")
+          "emotions can effect a stock price?\n")
 
     # Read API keys
     try:
@@ -56,6 +56,10 @@ if __name__ == "__main__":
                         help="Prints version and exits")
 
     args = parser.parse_args()
+
+    # Print help if no arguments are given.
+    if len(sys.argv) == 1:
+        parser.print_help()
 
     # Search for a given amount of tweets containing a list of keywords.
     if args.keywords and args.count:
@@ -92,4 +96,4 @@ if __name__ == "__main__":
             # Write results to csv.
             write2csv(data)
 
-    print("\n%s Done" % SUCCESS)
+        print("\n%s Done" % SUCCESS)

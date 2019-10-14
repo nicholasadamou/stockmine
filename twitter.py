@@ -20,15 +20,15 @@ from tweepy import API
 
 from logs import *
 
-# The keys for the Twitter account we're using for API requests.
-# Read from environment variables.
-TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
-TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
-
 # The keys for the Twitter app we're using for API requests
 # (https://apps.twitter.com/app/13239588). Read from environment variables.
 TWITTER_CONSUMER_KEY = getenv("TWITTER_CONSUMER_KEY")
 TWITTER_CONSUMER_SECRET = getenv("TWITTER_CONSUMER_SECRET")
+
+# The keys for the Twitter account we're using for API requests.
+# Read from environment variables.
+TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
+TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
 # The URL pattern for links to tweets.
 TWEET_URL = "https://twitter.com/%s/status/%s"
