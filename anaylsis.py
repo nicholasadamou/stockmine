@@ -26,9 +26,6 @@ EMOJI_THUMBS_UP = "\U0001f44d"
 EMOJI_THUMBS_DOWN = "\U0001f44e"
 EMOJI_SHRUG = "¯\\_(\u30c4)_/¯"
 
-# The maximum number of characters in a tweet.
-MAX_TWEET_SIZE = 140
-
 
 def entity_tostring(entity):
     """Converts one GNL (Google Natural Language) entity to a readable string."""
