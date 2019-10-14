@@ -1,6 +1,4 @@
-![logo](logo.png)
-
-This python program that analyzes recent tweets that mentions any publicly traded companies and launches a sentiment analysis to determine whether the aggregate opinion of the company in question is positive or negative for that time period.
+Crowd-sourced stock analyzer and stock predictor using Google Natural Language Processing API, Twitter, and Wikidata Space Query Service in order to determine how much do emotions effect a stock price?
 
 ![HackUIowa 2019](https://img.shields.io/badge/hackathon-HackUIowa%202019-yellow)
 ![License](https://img.shields.io/badge/license-GPLv3-blue.svg?style=flat-square)
@@ -8,7 +6,7 @@ This python program that analyzes recent tweets that mentions any publicly trade
 
 ---
 
-## 🤔 Why make '_Tweet2Stocks_'?
+## 🤔 Why make '_StockFlight_'?
 
 This project was created for the [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
 
@@ -76,7 +74,7 @@ $ pip install -r requirements.txt
 ### 3. Run the program
 
 ```shell script
-python3 tweet2stocks.py
+python3 stockflight.py
 ```
 
 ## License

@@ -1,6 +1,17 @@
-import os
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""twitter.py - authenticate and retrieve tweets from Twitter using
+Tweepy.
+
+See README.md or https://github.com/nicholasadamou/stockflight
+for more information.
+
+Copyright (C) Nicholas Adamou 2019
+stockflight is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+"""
+
 from os import getenv
-from py_dotenv import read_dotenv
 
 from re import findall
 
@@ -9,11 +20,8 @@ from tweepy import API
 
 from logs import *
 
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env')
-read_dotenv(dotenv_path)
-
-# The keys for the Twitter account we're using for API requests and tweeting
-# alerts (@Tweet2Stocks). Read from environment variables.
+# The keys for the Twitter account we're using for API requests.
+# Read from environment variables.
 TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
@@ -24,14 +32,6 @@ TWITTER_CONSUMER_SECRET = getenv("TWITTER_CONSUMER_SECRET")
 
 # The URL pattern for links to tweets.
 TWEET_URL = "https://twitter.com/%s/status/%s"
-
-# Some emoji.
-EMOJI_THUMBS_UP = "\U0001f44d"
-EMOJI_THUMBS_DOWN = "\U0001f44e"
-EMOJI_SHRUG = "¯\\_(\u30c4)_/¯"
-
-# The maximum number of characters in a tweet.
-MAX_TWEET_SIZE = 140
 
 
 def get_tweet_link(tweet):
@@ -64,76 +64,6 @@ def get_tweet_text(tweet):
     except KeyError:
         print("%s Malformed tweet: %s" % (ERROR, tweet))
         return None
-
-
-def get_sentiment_emoji(sentiment):
-    """Returns the emoji matching the sentiment."""
-
-    if not sentiment:
-        return EMOJI_SHRUG
-
-    if sentiment > 0:
-        return EMOJI_THUMBS_UP
-
-    if sentiment < 0:
-        return EMOJI_THUMBS_DOWN
-
-    print("%s Unknown sentiment: %s" % (ERROR, sentiment))
-    return EMOJI_SHRUG
-
-
-def compile_opinion_text(companies):
-    """Generates the text for a tweet."""
-
-    # Find all distinct company names.
-    names = []
-    for company in companies:
-        name = company["name"]
-        if name not in names:
-            names.append(name)
-
-    # Collect the ticker symbols and sentiment scores for each name.
-    tickers = {}
-    sentiments = {}
-    for name in names:
-        tickers[name] = []
-        for company in companies:
-            if company["name"] == name:
-                ticker = company["ticker"]
-                tickers[name].append(ticker)
-                sentiment = company["sentiment"]
-                # Assuming the same sentiment for each ticker.
-                sentiments[name] = sentiment
-
-    # Create lines for each name with sentiment emoji and ticker symbols.
-    lines = []
-    for name in names:
-        sentiment_str = get_sentiment_emoji(sentiments[name])
-        tickers_str = " ".join(["$%s" % t for t in tickers[name]])
-        line = "%s %s %s" % (name, sentiment_str, tickers_str)
-        lines.append(line)
-
-    return lines
-
-
-def make_tweet_text(results, link):
-    """Generates the text for a tweet."""
-
-    # Generate an opinion on the results.
-    opinions = compile_opinion_text(results)
-
-    # Combine the lines and eclipsing if necessary.
-    lines_str = "\n".join(opinions)
-    size = len(lines_str) + 1 + len(link)
-    if size > MAX_TWEET_SIZE:
-        print("%s Eclipsing lines: %s" % (WARNING, lines_str))
-        lines_size = MAX_TWEET_SIZE - len(link) - 2
-        lines_str = "%s\u2026" % lines_str[:lines_size]
-
-    # Combine the lines with the link.
-    text = "%s\n%s" % (lines_str, link)
-
-    return text
 
 
 class Twitter:

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Tweet2Stocks.iml" filepath="$PROJECT_DIR$/.idea/Tweet2Stocks.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../stockflight/.idea/stockflight.iml" filepath="$PROJECT_DIR$/../stockflight/.idea/stockflight.iml" />
     </modules>
   </component>
 </project>
