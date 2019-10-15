@@ -6,3 +6,4 @@ google-cloud-language
 requests
 tweepy
 py-dotenv
+flake8
