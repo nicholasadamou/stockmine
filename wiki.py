@@ -108,9 +108,9 @@ def get_company_data(mid):
             root = None
 
         try:
-            ticker = binding["tickerLabel"]["value"]
+            symbol = binding["tickerLabel"]["value"]
         except KeyError:
-            ticker = None
+            symbol = None
 
         try:
             exchange = binding["exchangeNameLabel"]["value"]
@@ -118,7 +118,7 @@ def get_company_data(mid):
             exchange = None
 
         company = {"name": name,
-                   "ticker": ticker,
+                   "symbol": symbol,
                    "exchange": exchange}
 
         # Add the root if there is one.

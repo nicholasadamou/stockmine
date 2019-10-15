@@ -69,10 +69,10 @@ def get_sentiment_emoji(sentiment):
     return EMOJI_SHRUG
 
 
-def compile_opinion_text(name, ticker, sentiment):
+def compile_opinion_text(name, symbol, sentiment):
     """Generates an opinion on a tweet."""
 
-    return "%s %s %s" % (name, get_sentiment_emoji(sentiment), ticker)
+    return "%s %s %s" % (name, get_sentiment_emoji(sentiment), symbol)
 
 
 def write2csv(results):
@@ -84,11 +84,11 @@ def write2csv(results):
 
     f = csv.writer(open('dist/' + file_name, "w"))
 
-    header = ['ticker', 'name', 'sentiment', 'opinion', 'tweet', 'url']
+    header = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
     f.writerow(header)
 
     for company in results:
-        f.writerow([company['ticker'], company['name'], company['sentiment'],
+        f.writerow([company['symbol'], company['name'], company['sentiment'],
                     company['opinion'], company['tweet'], company['url']])
 
 
@@ -190,11 +190,11 @@ class Analysis:
             # Extract and add a sentiment score.
             sentiment = self.extract_sentiment(company['tweet'])
             print("%s Using sentiment for company: %s %s" % (WARNING, sentiment, company))
-            results[company['ticker']] = {'sentiment': sentiment}
+            results[company['symbol']] = {'sentiment': sentiment}
 
             # Should we invest in $TICKER?
-            opinion = compile_opinion_text(company['name'], company['ticker'], sentiment)
+            opinion = compile_opinion_text(company['name'], company['symbol'], sentiment)
             print('%s %s' % (WARNING, opinion))
-            results[company['ticker']].update({'opinion': opinion})
+            results[company['symbol']].update({'opinion': opinion})
 
         return results

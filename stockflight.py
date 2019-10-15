@@ -23,10 +23,12 @@ import nltk as nltk
 from py_dotenv import read_dotenv
 from pyfiglet import Figlet
 
+from headlinelistener import HeadlineListener
 from logs import *
 from analysis import Analysis
 from monitor import Monitor
 from twitter import Twitter
+from yahoo import scrap_stock_price
 
 STOCKFLIGHT_VERSION = '0.1a'
 __version__ = STOCKFLIGHT_VERSION
@@ -173,6 +175,14 @@ if __name__ == "__main__":
                         help="Use keywords to search for in Tweets instead of feeds. "
                              "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
                              "Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX")
+    parser.add_argument("-s", "--symbol", metavar="SYMBOL",
+                        help="Stock symbol to use when fetching stock data., example: TSLA")
+    parser.add_argument("-n", "--news-headlines", action="store_true",
+                        help="Get news headlines instead of Twitter using stock symbol, example: TSLA")
+    parser.add_argument("-f", "--frequency", metavar="FREQUENCY", default=120, type=int,
+                        help="How often in seconds to retrieve news headlines (default: 120 sec)")
+    parser.add_argument("--follow-links", action="store_true",
+                        help="Follow links on news headlines and scrape relevant text from landing page")
     parser.add_argument("-V", "--version", action="version",
                         version="stockflight v%s" % STOCKFLIGHT_VERSION,
                         help="Prints version and exits")
@@ -182,10 +192,43 @@ if __name__ == "__main__":
     if len(sys.argv) == 1:
         parser.print_help()
 
-    monitor = Monitor()
-    monitor.start()
+    # Handle CLI arguments
 
-    try:
-        Main().run(args)
-    finally:
-        monitor.stop()
+    # python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
+    if args.keywords:
+        monitor = Monitor()
+        monitor.start()
+
+        try:
+            Main().run(args)
+        finally:
+            monitor.stop()
+    else:
+        # python3 stockflight.py --symbol TSLA
+        if args.symbol and not args.news_headlines:
+            symbol = args.symbol
+
+            results = scrap_stock_price(symbol)
+            print("%s FOUND DATA for %s: %s" % (OK, symbol, results))
+
+        # python3 stockflight.py --news-headlines --follow-links --symbol TSLA --frequency 120
+        elif args.symbol and args.news_headlines and args.follow_links:
+            symbol = args.symbol
+            frequency = args.frequency
+
+            try:
+                news_listener = HeadlineListener(symbol=symbol, frequency=frequency, follow_links=args.follow_links)
+            except KeyboardInterrupt:
+                print("%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+                sys.exit(0)
+
+        # python3 stockflight.py --news-headlines --symbol TSLA --frequency 120
+        elif args.symbol and args.news_headlines and not args.follow_links:
+            symbol = args.symbol
+            frequency = args.frequency
+
+            try:
+                news_listener = HeadlineListener(symbol=symbol, frequency=frequency)
+            except KeyboardInterrupt:
+                print("%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+                sys.exit(0)
