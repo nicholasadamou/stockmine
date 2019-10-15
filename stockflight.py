@@ -163,12 +163,6 @@ if __name__ == "__main__":
           "Wikidata API in order to determine, if at all, how much\n"
           "emotions can effect a stock price?\n")
 
-    print("%s TWITTER_CONSUMER_KEY = %s" % (OK, TWITTER_CONSUMER_KEY))
-    print("%s TWITTER_CONSUMER_SECRET = %s" % (OK, TWITTER_CONSUMER_SECRET))
-    print("%s TWITTER_ACCESS_TOKEN = %s" % (OK, TWITTER_ACCESS_TOKEN))
-    print("%s TWITTER_ACCESS_TOKEN_SECRET = %s" % (OK, TWITTER_ACCESS_TOKEN_SECRET))
-    print()
-
     # parse CLI arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("-k", "--keywords", metavar="KEYWORDS",
@@ -196,6 +190,12 @@ if __name__ == "__main__":
 
     # python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
     if args.keywords:
+        print("%s TWITTER_CONSUMER_KEY = %s" % (OK, TWITTER_CONSUMER_KEY))
+        print("%s TWITTER_CONSUMER_SECRET = %s" % (OK, TWITTER_CONSUMER_SECRET))
+        print("%s TWITTER_ACCESS_TOKEN = %s" % (OK, TWITTER_ACCESS_TOKEN))
+        print("%s TWITTER_ACCESS_TOKEN_SECRET = %s" % (OK, TWITTER_ACCESS_TOKEN_SECRET))
+        print()
+
         monitor = Monitor()
         monitor.start()
 
