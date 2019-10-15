@@ -106,20 +106,30 @@ class Main:
         results = analysis.analyze(companies)
 
         # Write results to [.csv] file.
-        # print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
-        #
-        # f = csv.writer(open(FILE_NAME, "w"))
-        #
-        # fields = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
-        #
-        # # Write headers
-        # if ",".join(fields) not in open(FILE_NAME).read():
-        #     f.writerow(fields)
+        print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
+        f = open(FILE_NAME, "w")
 
-        # Write individual values
-        for company in results:
-            print([company + ",".join(results.values())])
-            # f.writerow([company + ",".join(company.values())])
+        # Write fields to [.csv]
+        fields = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
+        if ",".join(fields) not in open(FILE_NAME).read():
+            print("%s fields: %s" % (OK, fields))
+            f.write(",".join(fields) + "\n")
+
+        # Write individual rows to [.csv].
+        for company in companies:
+            # Extract individual row data
+            symbol = company['symbol']
+            name = company['name']
+            tweet = company['tweet']
+            url = company['url']
+            data = [str(e) for e in results[company['symbol']].values()]
+
+            # Construct individual row.
+            row = symbol + "," + name + "," + ",".join(data) + "," + tweet + "," + url
+
+            # Write row data to [.csv].
+            print("%s row: %s" % (OK, row))
+            f.write(row + "\n")
 
         print("%s %s" % (OK, results))
 
@@ -236,17 +246,18 @@ if __name__ == "__main__":
 
             # Write results to [.csv] file.
             print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
+            f = open(FILE_NAME, "w")
 
-            f = csv.writer(open(FILE_NAME, "w"))
+            # Write fields to [.csv]
+            fields = ['symbol', 'date', 'last price', 'low', 'high', 'volume']
+            if ",".join(fields) not in open(FILE_NAME).read():
+                print("%s fields: %s" % (OK, fields))
+                f.write(",".join(fields) + "\n")
 
-            targets = ['symbol', 'date', 'last price', 'low', 'high', 'volume']
-
-            # Write headers
-            if ",".join(targets) not in open(FILE_NAME).read():
-                f.writerow(targets)
-
-            # Add values to each line
-            f.writerow([",".join([str(e) for e in results.values()])])
+            # Write row data to [.csv].
+            row = ",".join([str(e) for e in results.values()]) + "\n"
+            print("%s row: %s" % (OK, row))
+            f.write(row)
 
         # python3 stockflight.py --news-headlines --follow-links --symbol TSLA --frequency 120
         elif args.symbol and args.news_headlines and args.follow_links:
