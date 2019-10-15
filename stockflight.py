@@ -169,17 +169,21 @@ if __name__ == "__main__":
                         help="Use keywords to search for in Tweets instead of feeds. "
                              "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
                              "Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX")
+    parser.add_argument("-f", "--file", metavar="FILE",
+                        help="Use Twitter User IDs from file.")
+    parser.add_argument("-u", "--url", metavar="URL",
+                        help="Scrap Twitter User IDs from URL.")
     parser.add_argument("-s", "--symbol", metavar="SYMBOL",
                         help="Stock symbol to use when fetching stock data., example: TSLA")
     parser.add_argument("-n", "--news-headlines", action="store_true",
                         help="Get news headlines instead of Twitter using stock symbol, example: TSLA")
-    parser.add_argument("-f", "--frequency", metavar="FREQUENCY", default=120, type=int,
-                        help="How often in seconds to retrieve news headlines (default: 120 sec)")
+    parser.add_argument("--frequency", metavar="FREQUENCY", default=120, type=int,
+                        help="How often in seconds to retrieve news headlines. (default: 120 sec)")
     parser.add_argument("--follow-links", action="store_true",
-                        help="Follow links on news headlines and scrape relevant text from landing page")
+                        help="Follow links on news headlines and scrape relevant text from landing page.")
     parser.add_argument("-V", "--version", action="version",
                         version="stockflight v%s" % STOCKFLIGHT_VERSION,
-                        help="Prints version and exits")
+                        help="Prints version and exits.")
     args = parser.parse_args()
 
     # Print help if no arguments are given.
@@ -189,7 +193,7 @@ if __name__ == "__main__":
     # Handle CLI arguments
 
     # python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
-    if args.keywords:
+    if args.keywords or args.file or args.url:
         print("%s TWITTER_CONSUMER_KEY = %s" % (OK, TWITTER_CONSUMER_KEY))
         print("%s TWITTER_CONSUMER_SECRET = %s" % (OK, TWITTER_CONSUMER_SECRET))
         print("%s TWITTER_ACCESS_TOKEN = %s" % (OK, TWITTER_ACCESS_TOKEN))

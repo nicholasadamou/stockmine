@@ -81,6 +81,18 @@ Run `stockflight` to start mining and analyzing tweets using keywords.
 $ python3 stockflight.py --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX
 ```
 
+Run `stockflight` to start mining and analyzing tweets from specific users specified in a file.
+
+```shell
+$ python3 stockflight.py --file users.txt
+```
+
+Run `stockflight` to start mining and analyzing tweets from specific users scrapped from a URL.
+
+```shell
+$ python3 stockflight.py --url https://finance.yahoo.com/quote/TSLA?p=TSLA
+```
+
 Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page.
 
 ```sh
@@ -104,12 +116,16 @@ optional arguments:
                         Use keywords to search for in Tweets instead of feeds.
                         Separated by comma, case insensitive, spaces are ANDs
                         commas are ORs. Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX
+  -f FILE, --file FILE
+                        Use Twitter User IDs from file.
+  -u URL, --url URL
+                        Scrap Twitter User IDs from URL.
   -s SYMBOL, --symbol SYMBOL
                         Stock symbol to use when fetching stock data., example: TSLA
   -n, --news-headlines
                         Get news headlines instead of Twitter using stock.
                         symbol, example: TSLA
-  -f FREQUENCY, --frequency FREQUENCY
+  --frequency FREQUENCY
                         How often in seconds to retrieve news headlines.
                         (default: 120 sec)
   --follow-links        Follow links on news headlines and scrape relevant

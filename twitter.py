@@ -12,8 +12,17 @@ LICENSE for the full license text.
 """
 import os
 import sys
+import time
 from os import getenv
+from random import randint
 
+try:
+    import urllib.parse as urlparse
+except ImportError:
+    import urlparse
+
+import requests
+from bs4 import BeautifulSoup
 from py_dotenv import read_dotenv
 from tweepy import OAuthHandler, Stream, TweepError
 from tweepy import API
@@ -37,7 +46,6 @@ TWITTER_CONSUMER_SECRET = getenv("TWITTER_CONSUMER_SECRET")
 # Read from environment variables.
 TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
-
 
 # The URL pattern for links to tweets.
 TWEET_URL = "https://twitter.com/%s/status/%s"
@@ -75,6 +83,103 @@ def get_tweet_text(tweet):
         return None
 
 
+def get_twitter_users_from_file(file):
+    """Returns a list of Twitter user ID's from a file."""
+
+    # Get Twitter User IDs from file.
+    users = []
+    print("%s Grabbing any Twitter User IDs from file: %s" % (OK, file))
+
+    try:
+        f = open(file, "rt", encoding='utf-8')
+
+        for line in f.readlines():
+            user = line.strip()
+            users.append(user)
+        print("%s FOUND USERS: %s" % (OK, users))
+
+        f.close()
+    except (IOError, OSError) as e:
+        print("%s Exception: Error opening file %s caused by: %s" % (ERROR, file, e))
+        pass
+
+    return users
+
+
+def scrap_twitter_users_from_url(url):
+    """Scraps a list of Twitter user ID's from a URL."""
+
+    # Get Twitter User IDs from file.
+    users = []
+    print("%s Grabbing any Twitter User IDs from URL: %s" % (OK, url))
+
+    try:
+        urls = ("http://twitter.com/", "http://www.twitter.com/",
+                "https://twitter.com/", "https://www.twitter.com/")
+
+        request = requests.get(url)
+        html = request.text
+        soup = BeautifulSoup(html, 'html.parser')
+
+        links = []
+        for link in soup.findAll('a'):
+            links.append(link.get('href'))
+
+        if links:
+            for link in links:
+
+                # Check if twitter_url in link.
+                parsed_uri = urlparse.urljoin(link, '/')
+
+                # Get Twitter user name from link and add to list.
+                if parsed_uri in urls and "=" not in link and "?" not in link:
+                    user = link.split('/')[3]
+                    users.append(u'@' + user)
+
+            print("%s FOUND USERS: %s" % (OK, users))
+    except requests.exceptions.RequestException as re:
+        print("%s Requests Exception: can't crawl web-site (%s)" % re)
+        pass
+
+    return users
+
+
+def stream_users_feeds(twitter, stream, target, users):
+    """Stream a list of Twitter Users' FEEDs."""
+
+    # Make sure we have Twitter User IDs
+    if len(users) == 0:
+        print("%s No Twitter User IDs found in %s" % (ERROR, target))
+        sys.exit(1)
+
+    # Build Twitter User ID list by accessing the Twitter API.
+    user_uids = []
+    while True:
+        for user in users:
+            try:
+                # Get user ID from screen_name using Twitter API.
+                user = twitter.get_user(screen_name=user)
+                uid = int(user.id)
+                if uid not in users:
+                    user_uids.append(uid)
+                time.sleep(randint(0, 2))
+            except TweepError as te:
+                # Sleep a bit in case Twitter suspends us.
+                print("%s Tweepy Exception: %s" % (ERROR, te))
+                print("%s Sleeping for a random amount of time and retrying." % WARNING)
+                time.sleep(randint(1, 10))
+                continue
+            except KeyboardInterrupt:
+                print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+                stream.disconnect()
+                sys.exit(0)
+        break
+
+    # Search for tweets containing a list of keywords.
+    print("%s Following %s Twitter FEEDs" % (WARNING, user_uids))
+    stream.filter(follow=user_uids, languages=['en'])
+
+
 class Twitter:
     """A helper for talking to Twitter APIs."""
 
@@ -104,6 +209,34 @@ class Twitter:
                 keywords = args.keywords.split(',')
                 print("%s Searching for tweets containing %s" % (WARNING, keywords))
                 twitter_stream.filter(track=keywords, languages=['en'])
+            except TweepError:
+                print("%s Twitter API error %s" % (ERROR, TweepError))
+            except KeyboardInterrupt:
+                print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+                twitter_stream.disconnect()
+                sys.exit(0)
+        elif args.file:
+            try:
+                # Obtain a list of Twitter User IDs from file.
+                file = args.file
+                user_ids = get_twitter_users_from_file(file)
+
+                # Stream a list of Twitter users' FEEDs.
+                stream_users_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=user_ids)
+            except TweepError:
+                print("%s Twitter API error %s" % (ERROR, TweepError))
+            except KeyboardInterrupt:
+                print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+                twitter_stream.disconnect()
+                sys.exit(0)
+        elif args.url:
+            try:
+                # Obtain a list of Twitter User IDs from URL.
+                url = args.url
+                user_ids = scrap_twitter_users_from_url(url)
+
+                # Stream a list of Twitter users' FEEDs.
+                stream_users_feeds(twitter=self.twitter_api, stream=twitter_stream, target=url, users=user_ids)
             except TweepError:
                 print("%s Twitter API error %s" % (ERROR, TweepError))
             except KeyboardInterrupt:
