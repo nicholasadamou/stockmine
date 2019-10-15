@@ -93,3 +93,4 @@ ENV/
 
 # misc.
 API/*
+*.csv
