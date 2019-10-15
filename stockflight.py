@@ -9,7 +9,7 @@ Copyright (C) Nicholas Adamou 2019
 stockflight is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
-import csv
+
 import os
 import argparse
 import re
