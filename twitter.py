@@ -144,7 +144,7 @@ def scrap_twitter_users_from_url(url):
     return users
 
 
-def stream_users_feeds(twitter, stream, target, users):
+def stream_user_feeds(twitter, stream, target, users):
     """Stream a list of Twitter Users' FEEDs."""
 
     # Make sure we have Twitter User IDs
@@ -222,7 +222,7 @@ class Twitter:
                 user_ids = get_twitter_users_from_file(file)
 
                 # Stream a list of Twitter users' FEEDs.
-                stream_users_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=user_ids)
+                stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=user_ids)
             except TweepError:
                 print("%s Twitter API error %s" % (ERROR, TweepError))
             except KeyboardInterrupt:
@@ -236,7 +236,7 @@ class Twitter:
                 user_ids = scrap_twitter_users_from_url(url)
 
                 # Stream a list of Twitter users' FEEDs.
-                stream_users_feeds(twitter=self.twitter_api, stream=twitter_stream, target=url, users=user_ids)
+                stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=url, users=user_ids)
             except TweepError:
                 print("%s Twitter API error %s" % (ERROR, TweepError))
             except KeyboardInterrupt:
