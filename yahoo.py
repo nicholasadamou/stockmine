@@ -27,7 +27,9 @@ from logs import OK, ERROR, WARNING
 YAHOO_FINANCE_QUERY_URL = "https://finance.yahoo.com/quote/%s/?p=%s"
 
 # The URL to fetch stock price from, SYMBOL will be replaced with ticker symbol from CLI arguments.
-YAHOO_FINANCE_STOCK_QUERY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/SYMBOL?region=US&lang=en-US&includePrePost=false&interval=2m&range=5d&corsdataomain=finance.yahoo.com&.tsrc=finance"
+YAHOO_FINANCE_STOCK_QUERY_URL = "https://query1.finance.yahoo.com/v8/finance/chart/SYMBOL?region=US&lang=en-US" \
+                                "&includePrePost=false&interval=2m&range=5d&corsdataomain=finance.yahoo.com&.tsrc" \
+                                "=finance"
 
 # Maximum number of paragraphs to crawl on a Companies Yahoo Finance page
 MAX_PARAGRAPHS = 10
