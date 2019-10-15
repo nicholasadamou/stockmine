@@ -70,15 +70,15 @@ There are a few library dependencies, which you can install using
 [pip](https://pip.pypa.io/en/stable/quickstart/):
 
 ```shell
-$ pip install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
 ### 3. Run the program using the following examples
 
-Run `stockflight` to start mining and analyzing a given amount of tweets using keywords.
+Run `stockflight` to start mining and analyzing tweets using keywords.
 
 ```shell
-$ python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla -c 500
+$ python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
 ```
 
 ### CLI options
@@ -92,9 +92,6 @@ optional arguments:
                         Use keywords to search for in Tweets instead of feeds.
                         Separated by comma, case insensitive, spaces are ANDs
                         commas are ORs. Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX
-  -c COUNT, --count COUNT
-                        How many tweets to analyze
-                        (default: 120)
   -V, --version         Prints version and exits
   ```
 

@@ -16,7 +16,7 @@ from google.cloud import language
 
 from datetime import date
 
-from twitter import Twitter, get_tweet_link
+from twitter import get_tweet_link
 
 from logs import *
 from wiki import get_company_data
@@ -97,7 +97,6 @@ class Analysis:
 
     def __init__(self):
         self.language_client = language.LanguageServiceClient()
-        self.twitter = Twitter()
 
     def find_companies(self, tweet):
         """Finds any mention of companies in a tweet."""
@@ -106,7 +105,7 @@ class Analysis:
             print("%s No tweet to find companies." % WARNING)
             return None
 
-        text = tweet.text
+        text = tweet['text']
         if not text:
             print("%s Failed to get text from tweet: %s" % (WARNING, tweet))
             return None
@@ -189,12 +188,12 @@ class Analysis:
 
         for company in companies:
             # Extract and add a sentiment score.
-            sentiment = self.extract_sentiment(company.tweet)
+            sentiment = self.extract_sentiment(company['tweet'])
             print("%s Using sentiment for company: %s %s" % (WARNING, sentiment, company))
             results[company['ticker']] = {'sentiment': sentiment}
 
             # Should we invest in $TICKER?
-            opinion = compile_opinion_text(sentiment)
+            opinion = compile_opinion_text(company['name'], company['ticker'], sentiment)
             print('%s %s' % (WARNING, opinion))
             results[company['ticker']].update({'opinion': opinion})
 

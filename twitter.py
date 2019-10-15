@@ -10,15 +10,23 @@ Copyright (C) Nicholas Adamou 2019
 stockflight is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
-
+import os
+import sys
 from os import getenv
 
-from re import findall
-
-from tweepy import OAuthHandler
+from py_dotenv import read_dotenv
+from tweepy import OAuthHandler, Stream, TweepError
 from tweepy import API
 
 from logs import *
+from twitterlistener import API_RETRY_DELAY_S, API_RETRY_COUNT, API_RETRY_ERRORS, TwitterListener
+
+# Read API keys
+try:
+    read_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+except FileNotFoundError:
+    print("\n%s .env does not exist. Please create the file & add the necessary API keys to it." % ERROR)
+    exit(1)
 
 # The keys for the Twitter app we're using for API requests
 # (https://apps.twitter.com/app/13239588). Read from environment variables.
@@ -29,6 +37,7 @@ TWITTER_CONSUMER_SECRET = getenv("TWITTER_CONSUMER_SECRET")
 # Read from environment variables.
 TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
 TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
+
 
 # The URL pattern for links to tweets.
 TWEET_URL = "https://twitter.com/%s/status/%s"
@@ -42,8 +51,8 @@ def get_tweet_link(tweet):
         return None
 
     try:
-        screen_name = tweet.user.screen_name
-        id_str = tweet.id_str
+        screen_name = tweet['user']['screen_name']
+        id_str = tweet['id_str']
     except KeyError:
         print("%s Malformed tweet for link: %s" % (ERROR, tweet))
         return None
@@ -60,7 +69,7 @@ def get_tweet_text(tweet):
     # whether the tweet came through the REST API or the Streaming API:
     # https://dev.twitter.com/overview/api/upcoming-changes-to-tweets
     try:
-        return tweet.text
+        return tweet['text']
     except KeyError:
         print("%s Malformed tweet: %s" % (ERROR, tweet))
         return None
@@ -75,19 +84,49 @@ class Twitter:
         self.twitter_auth.set_access_token(TWITTER_ACCESS_TOKEN,
                                            TWITTER_ACCESS_TOKEN_SECRET)
 
-        self.twitter_api = API(auth_handler=self.twitter_auth)
+        self.twitter_api = API(auth_handler=self.twitter_auth,
+                               retry_count=API_RETRY_COUNT,
+                               retry_delay=API_RETRY_DELAY_S,
+                               retry_errors=API_RETRY_ERRORS,
+                               wait_on_rate_limit=True,
+                               wait_on_rate_limit_notify=True)
 
-    def search(self, query, count):
-        """Returns a list of tweets (tweet) matching the query"""
+    def start_streaming(self, args, callback):
+        """Starts streaming tweets and returning data to the callback."""
 
-        tweets = []
+        self.twitter_listener = TwitterListener(callback=callback)
 
-        # query (q=) of '*' returns all tweets
-        for tweet in self.twitter_api.search(q=query, lang="en", count=count, result_type="mixed"):
-            print("%s %s" % (OK, tweet.text))
-            tweets.append(tweet)
+        twitter_stream = Stream(self.twitter_auth, self.twitter_listener)
 
-        return tweets
+        if args.keywords:
+            try:
+                # Search for tweets containing a list of keywords.
+                keywords = args.keywords.split(',')
+                print("%s Searching for tweets containing %s" % (WARNING, keywords))
+                twitter_stream.filter(track=keywords, languages=['en'])
+            except TweepError:
+                print("%s Twitter API error %s" % (ERROR, TweepError))
+            except KeyboardInterrupt:
+                print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+                twitter_stream.disconnect()
+                sys.exit(0)
+
+        # If we got here because of an API error, raise it.
+        if self.twitter_listener and self.twitter_listener.get_error_status():
+            raise Exception("Twitter API error: %s" %
+                            self.twitter_listener.get_error_status())
+
+        return twitter_stream
+
+    def stop_streaming(self):
+        """Stops the current stream."""
+
+        if not self.twitter_listener:
+            print("%s No stream to stop." % WARNING)
+            return
+
+        self.twitter_listener.stop_queue()
+        self.twitter_listener = None
 
     def get_tweet(self, tweet_id):
         """Looks up metadata for a single tweet."""
