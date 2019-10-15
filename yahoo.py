@@ -111,7 +111,7 @@ def crawl_page_text(url):
         pass
 
 
-def scrap_stock_price(symbol):
+def scrap_company_data(symbol):
     """Scraps Yahoo Finance for stock price data pertaining to a given ticker symbol."""
 
     # Add stock symbol to URL

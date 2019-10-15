@@ -28,7 +28,7 @@ from logs import *
 from analysis import Analysis
 from monitor import Monitor
 from twitter import Twitter
-from yahoo import scrap_stock_price
+from yahoo import scrap_company_data
 
 STOCKFLIGHT_VERSION = '0.1a'
 __version__ = STOCKFLIGHT_VERSION
@@ -208,7 +208,7 @@ if __name__ == "__main__":
         if args.symbol and not args.news_headlines:
             symbol = args.symbol
 
-            results = scrap_stock_price(symbol)
+            results = scrap_company_data(symbol)
             print("%s FOUND DATA for %s: %s" % (OK, symbol, results))
 
         # python3 stockflight.py --news-headlines --follow-links --symbol TSLA --frequency 120
