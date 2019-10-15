@@ -14,8 +14,6 @@ import csv
 
 from google.cloud import language
 
-from datetime import date
-
 from twitter import get_tweet_link
 
 from logs import *
@@ -75,21 +73,19 @@ def compile_opinion_text(name, symbol, sentiment):
     return "%s %s %s" % (name, get_sentiment_emoji(sentiment), symbol)
 
 
-def write2csv(results):
-    """Writes results to .csv file"""
-
-    file_name = 'stockflight' + "_" + date.today().strftime("%d-%m-%Y") + ".csv"
+def write2csv(file_name, results, targets):
+    """Writes results to [.csv] file."""
 
     print('\n%s Writing results to %s' % (WARNING, file_name))
 
-    f = csv.writer(open('dist/' + file_name, "w"))
+    f = csv.writer(open(file_name, "w"))
 
-    header = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
-    f.writerow(header)
+    # Write headers
+    if ",".join(targets) not in open(file_name).read():
+        f.writerow(targets)
 
-    for company in results:
-        f.writerow([company['symbol'], company['name'], company['sentiment'],
-                    company['opinion'], company['tweet'], company['url']])
+    # Write individual values
+    f.writerow([",".join([str(e) for e in results.values()])])
 
 
 class Analysis:

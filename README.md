@@ -1,6 +1,6 @@
 # stockflight 🛫
 
-Crowd-sourced stock analyzer and stock predictor using Google's [Cloud Natural Language API](https://cloud.google.com/natural-language/), Twitter, and [Wikidata Query Service](https://query.wikidata.org/) in order to determine how much do emotions effect a stock price?
+Crowd-sourced stock analyzer and stock predictor using Google's [Cloud Natural Language API](https://cloud.google.com/natural-language/), Twitter, and [Wikidata Query Service](https://query.wikidata.org/) in order to determine how much do emotions affect a stock price?
 
 ![HackUIowa 2019](https://img.shields.io/badge/hackathon-HackUIowa%202019-yellow)
 [![License](https://img.shields.io/github/license/nicholasadamou/stockflight.svg?label=License&maxAge=86400)](./LICENSE)

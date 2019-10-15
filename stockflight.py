@@ -9,17 +9,17 @@ Copyright (C) Nicholas Adamou 2019
 stockflight is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
-
+import csv
 import os
 import argparse
 import re
 import sys
+import time
 from time import sleep
 from datetime import datetime
 from os import getenv
 
 import nltk as nltk
-
 from py_dotenv import read_dotenv
 from pyfiglet import Figlet
 
@@ -69,6 +69,9 @@ MAX_TRIES = 12
 # smallest interval at which backoff sequences may repeat normally.
 BACKOFF_RESET_S = 30 * 60
 
+# The file-name of the outputted .csv file
+FILE_NAME = 'stockflight' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
+
 
 class Main:
     """A wrapper for the main application logic and retry loop."""
@@ -101,6 +104,22 @@ class Main:
 
         # Analyze a tweet & obtain its sentiment.
         results = analysis.analyze(companies)
+
+        # Write results to [.csv] file.
+        # print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
+        #
+        # f = csv.writer(open(FILE_NAME, "w"))
+        #
+        # fields = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
+        #
+        # # Write headers
+        # if ",".join(fields) not in open(FILE_NAME).read():
+        #     f.writerow(fields)
+
+        # Write individual values
+        for company in results:
+            print([company + ",".join(results.values())])
+            # f.writerow([company + ",".join(company.values())])
 
         print("%s %s" % (OK, results))
 
@@ -161,7 +180,7 @@ if __name__ == "__main__":
     print("Crowd-sourced stock analyzer and stock predictor using\n"
           "Google Natural Language Processing API, Twitter, and\n"
           "Wikidata API in order to determine, if at all, how much\n"
-          "emotions can effect a stock price?\n")
+          "emotions can affect a stock price?\n")
 
     # parse CLI arguments
     parser = argparse.ArgumentParser()
@@ -214,6 +233,20 @@ if __name__ == "__main__":
 
             results = scrap_company_data(symbol)
             print("%s FOUND DATA for %s: %s" % (OK, symbol, results))
+
+            # Write results to [.csv] file.
+            print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
+
+            f = csv.writer(open(FILE_NAME, "w"))
+
+            targets = ['symbol', 'date', 'last price', 'low', 'high', 'volume']
+
+            # Write headers
+            if ",".join(targets) not in open(FILE_NAME).read():
+                f.writerow(targets)
+
+            # Add values to each line
+            f.writerow([",".join([str(e) for e in results.values()])])
 
         # python3 stockflight.py --news-headlines --follow-links --symbol TSLA --frequency 120
         elif args.symbol and args.news_headlines and args.follow_links:
