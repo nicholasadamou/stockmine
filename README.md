@@ -22,7 +22,7 @@ done using Google's [Cloud Natural Language API](https://cloud.google.com/natura
 
 Follow these steps to run the code yourself:
 
-### 2. Set up auth
+### 1. Set up auth
 
 The authentication keys for the different APIs are read from shell environment
 variables. Each service has different steps to obtain them.
