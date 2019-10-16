@@ -12,7 +12,7 @@ Crowd-sourced stock analyzer and stock predictor using Google's [Cloud Natural L
 
 This project was created for the 2019 [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
 
-HackUIowa was a 2 day non-stop hackathon, and it was held at University of Iowa in the heart of downtown Iowa City, USA.2
+HackUIowa was a 2 day non-stop hackathon, and it was held at University of Iowa in the heart of downtown Iowa City, USA.
 
 ## Technologies
 
