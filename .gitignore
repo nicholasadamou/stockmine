@@ -92,6 +92,5 @@ ENV/
 .vscode
 
 # misc.
-API/*
+stockflight*.json
 *.csv
-config.py
