@@ -17,7 +17,6 @@ import sys
 import time
 from time import sleep
 from datetime import datetime
-from os import getenv
 
 import nltk as nltk
 from py_dotenv import read_dotenv
@@ -40,22 +39,28 @@ if sys.version_info >= (3, 0):
 # for tokenizing tweet text.
 nltk.download('punkt')
 
+# Read Configuration settings
+try:
+    # The keys for the Twitter app we're using for API requests
+    # (https://apps.twitter.com/app/13239588). Read from environment variables.
+    from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+
+    # The keys for the Twitter account we're using for API requests.
+    # Read from environment variables.
+    from config import TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
+
+    # Additional configurations
+    from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
+except FileNotFoundError:
+    print("\n%s 'config.py' does not exist. Please create the file & add the necessary settings to it." % ERROR)
+    exit(1)
+
 # Read API keys
 try:
     read_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 except FileNotFoundError:
-    print("\n%s .env does not exist. Please create the file & add the necessary API keys to it." % ERROR)
+    print("\n%s '.env' does not exist. Please create the file & add the necessary API keys to it." % ERROR)
     exit(1)
-
-# The keys for the Twitter app we're using for API requests
-# (https://apps.twitter.com/app/13239588). Read from environment variables.
-TWITTER_CONSUMER_KEY = getenv("TWITTER_CONSUMER_KEY")
-TWITTER_CONSUMER_SECRET = getenv("TWITTER_CONSUMER_SECRET")
-
-# The keys for the Twitter account we're using for API requests.
-# Read from environment variables.
-TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
-TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
 # The duration of the smallest backoff step in seconds.
 BACKOFF_STEP_S = 0.1
@@ -90,6 +95,16 @@ class Main:
         tokens = nltk.word_tokenize(text_for_tokens)
         print("%s NLTK Tokens: %s" % (OK, str(tokens)))
 
+        # Skip if required NLTK tokens are not present within the tweet's body.
+        if not any(token in REQUIRED_NLTK_TOKENS for token in tokens):
+            print("%s Tweet does not contain required NLTK tokens, skipping." % WARNING)
+            return
+
+        # Skip if ignored NLTK tokens are present within the tweet's body.
+        if any(token in IGNORED_NLTK_TOKENS for token in tokens):
+            print("%s Tweet contains an ignored NLTK token, skipping." % WARNING)
+            return
+
         # strip out hash-tags for language processing.
         text = re.sub(r"[#|@$]\S+", "", tweet['text']).strip()
         tweet['text'] = text
@@ -107,7 +122,7 @@ class Main:
 
         # Write results to [.csv] file.
         print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
-        f = open(FILE_NAME, "w")
+        f = open(FILE_NAME, "a")
 
         # Write fields to [.csv]
         fields = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
@@ -227,6 +242,9 @@ if __name__ == "__main__":
         print("%s TWITTER_CONSUMER_SECRET = %s" % (OK, TWITTER_CONSUMER_SECRET))
         print("%s TWITTER_ACCESS_TOKEN = %s" % (OK, TWITTER_ACCESS_TOKEN))
         print("%s TWITTER_ACCESS_TOKEN_SECRET = %s" % (OK, TWITTER_ACCESS_TOKEN_SECRET))
+        print("%s REQUIRED NLTK TOKENS = %s" % (OK, REQUIRED_NLTK_TOKENS))
+        print("%s IGNORED NLTK TOKENS = %s" % (OK, IGNORED_NLTK_TOKENS))
+        print("%s USERS = %s" % (OK, USERS))
         print()
 
         monitor = Monitor()

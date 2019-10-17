@@ -17,6 +17,8 @@ import time
 from os import getenv
 from random import randint
 
+from config import USERS, REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS
+
 try:
     import urllib.parse as urlparse
 except ImportError:
@@ -24,29 +26,27 @@ except ImportError:
 
 import requests
 from bs4 import BeautifulSoup
-from py_dotenv import read_dotenv
 from tweepy import OAuthHandler, Stream, TweepError
 from tweepy import API
 
 from logs import *
 from twitterlistener import API_RETRY_DELAY_S, API_RETRY_COUNT, API_RETRY_ERRORS, TwitterListener
 
-# Read API keys
+# Read Configuration settings
 try:
-    read_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+    # The keys for the Twitter app we're using for API requests
+    # (https://apps.twitter.com/app/13239588). Read from environment variables.
+    from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
+
+    # The keys for the Twitter account we're using for API requests.
+    # Read from environment variables.
+    from config import TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
+
+    # Additional configurations
+    from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
 except FileNotFoundError:
-    print("\n%s .env does not exist. Please create the file & add the necessary API keys to it." % ERROR)
+    print("\n%s config.py does not exist. Please create the file & add the necessary settings to it." % ERROR)
     exit(1)
-
-# The keys for the Twitter app we're using for API requests
-# (https://apps.twitter.com/app/13239588). Read from environment variables.
-TWITTER_CONSUMER_KEY = getenv("TWITTER_CONSUMER_KEY")
-TWITTER_CONSUMER_SECRET = getenv("TWITTER_CONSUMER_SECRET")
-
-# The keys for the Twitter account we're using for API requests.
-# Read from environment variables.
-TWITTER_ACCESS_TOKEN = getenv("TWITTER_ACCESS_TOKEN")
-TWITTER_ACCESS_TOKEN_SECRET = getenv("TWITTER_ACCESS_TOKEN_SECRET")
 
 # The URL pattern for links to tweets.
 TWEET_URL = "https://twitter.com/%s/status/%s"
@@ -95,8 +95,8 @@ def get_twitter_users_from_file(file):
         f = open(file, "rt", encoding='utf-8')
 
         for line in f.readlines():
-            user = line.strip()
-            users.append(user)
+            for user in line.strip().split(','):
+                users.append(user)
         print("%s FOUND USERS: %s" % (OK, users))
 
         f.close()
@@ -154,15 +154,20 @@ def stream_user_feeds(twitter, stream, target, users):
         sys.exit(1)
 
     # Build Twitter User ID list by accessing the Twitter API.
-    user_uids = []
+    print("%s Building Twitter User ID list from %s" % (WARNING, users))
+    user_ids = []
     while True:
         for user in users:
             try:
                 # Get user ID from screen_name using Twitter API.
                 user = twitter.get_user(screen_name=user)
-                uid = int(user.id)
-                if uid not in users:
-                    user_uids.append(uid)
+                screen_name = user.screen_name
+                id = int(user.id)
+
+                if id not in users:
+                    print("%s Obtained [@%s:%s]" % (OK, screen_name, id))
+                    user_ids.append(str(id))
+
                 time.sleep(randint(0, 2))
             except TweepError as te:
                 # Sleep a bit in case Twitter suspends us.
@@ -177,8 +182,8 @@ def stream_user_feeds(twitter, stream, target, users):
         break
 
     # Search for tweets containing a list of keywords.
-    print("%s Following %s Twitter FEEDs" % (WARNING, user_uids))
-    stream.filter(follow=user_uids, languages=['en'])
+    print("%s Following %s Twitter FEEDs" % (WARNING, users))
+    stream.filter(follow=user_ids, languages=['en'])
 
 
 class Twitter:
@@ -208,6 +213,11 @@ class Twitter:
             try:
                 # Search for tweets containing a list of keywords.
                 keywords = args.keywords.split(',')
+
+                # Append list of required NLTK tokens to [keywords].
+                if REQUIRED_NLTK_TOKENS:
+                    keywords.append(",".join(REQUIRED_NLTK_TOKENS))
+
                 print("%s Searching for tweets containing %s" % (WARNING, keywords))
                 twitter_stream.filter(track=keywords, languages=['en'])
             except TweepError:
@@ -220,10 +230,15 @@ class Twitter:
             try:
                 # Obtain a list of Twitter User IDs from file.
                 file = args.file
-                user_ids = get_twitter_users_from_file(file)
+                users = get_twitter_users_from_file(file)
+
+                # Append list of Twitter Users from 'config.py'.
+                print("%s Append list of Twitter User IDs from 'config.py'" % WARNING)
+                users = list(set(users + USERS))
 
                 # Stream a list of Twitter users' FEEDs.
-                stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=user_ids)
+                print("%s Searching for tweets from %s" % (WARNING, users))
+                stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=users)
             except TweepError:
                 print("%s Twitter API error %s" % (ERROR, TweepError))
             except KeyboardInterrupt:
@@ -234,10 +249,14 @@ class Twitter:
             try:
                 # Obtain a list of Twitter User IDs from URL.
                 url = args.url
-                user_ids = scrap_twitter_users_from_url(url)
+                users = scrap_twitter_users_from_url(url)
+
+                # Append list of Twitter Users from 'config.py'.
+                users = list(set(users + USERS))
 
                 # Stream a list of Twitter users' FEEDs.
-                stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=url, users=user_ids)
+                print("%s Searching for tweets from %s" % (WARNING, users))
+                stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=url, users=users)
             except TweepError:
                 print("%s Twitter API error %s" % (ERROR, TweepError))
             except KeyboardInterrupt:

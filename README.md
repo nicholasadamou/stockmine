@@ -73,7 +73,47 @@ There are a few library dependencies, which you can install using
 $ pip3 install -r requirements.txt
 ```
 
-### 3. Run the program using the following examples
+### 3. Set up `config.py` & `.env`
+
+`config.py` is the main configuration file for `stockflight`. 
+
+```python
+# The keys for the Twitter app we're using for API requests
+# (https://apps.twitter.com/app/13239588). Read from environment variables.
+TWITTER_CONSUMER_KEY = ""
+TWITTER_CONSUMER_SECRET = ""
+
+# The keys for the Twitter account we're using for API requests.
+# Read from environment variables.
+TWITTER_ACCESS_TOKEN = ""
+TWITTER_ACCESS_TOKEN_SECRET = ""
+
+# Required words that each tweet must contain.
+REQUIRED_NLTK_TOKENS = ["Tesla", "@Tesla", "#Tesla", "tesla", "TSLA", "tsla",
+                        "#TSLA", "#tsla", "elonmusk", "Elon", "Musk"]
+
+# Words that each tweet must not contain.
+IGNORED_NLTK_TOKENS = ["win", "Win", "giveaway", "Giveaway"]
+
+# List of target users to listen for tweets from.
+USERS = ["@elonmusk", "@cnbc", "@benzinga", "@stockwits",
+         "@Newsweek", "@WashingtonPost", "@breakoutstocks", "@bespokeinvest",
+         "@WSJMarkets", "@stephanie_link", "@nytimesbusiness", "@IBDinvestors",
+         "@WSJDealJournal", "@jimcramer", "@TheStalwart", "@TruthGundlach",
+         "@Carl_C_Icahn", "@ReformedBroker", "@bespokeinvest", "@stlouisfed",
+         "@muddywatersre", "@mcuban", "@AswathDamodaran", "@elerianm",
+         "@MorganStanley", "@ianbremmer", "@GoldmanSachs", "@Wu_Tang_Finance",
+         "@Schuldensuehner", "@NorthmanTrader", "@Frances_Coppola",
+         "@BuzzFeed", "@nytimes"]
+```
+
+`.env` is the file used to store Google Cloud's service account key PATH.
+
+```shell
+GOOGLE_APPLICATION_CREDENTIALS=
+```
+
+### 4. Run the program using the following examples
 
 Run `stockflight` to start mining and analyzing tweets using keywords.
 

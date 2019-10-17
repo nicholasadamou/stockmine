@@ -17,6 +17,7 @@ from datetime import datetime
 import nltk
 
 from analysis import Analysis
+from config import IGNORED_NLTK_TOKENS, REQUIRED_NLTK_TOKENS
 from logs import OK, WARNING
 from yahoo import scrap_yahoo_finance
 
@@ -43,17 +44,37 @@ class HeadlineListener:
                 if headline not in self.headlines:
                     self.headlines.append(headline)
 
-                    # Output current headline
+                    # Output current headline.
                     date = datetime.utcnow().isoformat()
                     print("%s %s %s %s" % (OK, date, headline, url))
 
-                    # Tokenize words for use with NLTK
+                    # Tokenize words for use with NLTK.
                     text_for_tokens = re.sub(
                         r"[%|$.,!:@]|\(|\)|#|\+|(``)|('')|\?|-", "", headline)
                     tokens = nltk.word_tokenize(text_for_tokens)
                     print("%s NLTK Tokens: %s" % (OK, str(tokens)))
 
-                    # Obtain sentiment
+                    if len(IGNORED_NLTK_TOKENS) > 0:
+                        # Make sure [tokens] does not contain any of the ignored NLTK tokens.
+                        for token in IGNORED_NLTK_TOKENS:
+                            if token in tokens:
+                                print("%s Token %s is IGNORED" % (WARNING, token))
+                                continue
+
+                    if len(REQUIRED_NLTK_TOKENS) > 0:
+                        # Make sure [tokens] does contains all required NLTK tokens.
+                        contains_token = False
+                        for token in REQUIRED_NLTK_TOKENS:
+                            if token in tokens:
+                                contains_token = True
+                                break
+
+                        if not contains_token:
+                            print("%s Text does not contain %s from 'config.py', skipping." %
+                                  (WARNING, REQUIRED_NLTK_TOKENS))
+                            continue
+
+                    # Obtain sentiment.
                     sentiment = analysis.extract_sentiment(headline)
                     print("%s Using sentiment %s for %s" % (OK, sentiment, headline))
 
