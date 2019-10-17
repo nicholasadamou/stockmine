@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""stockflight.py - main configuration file for stockflight.
+"""config.py - main configuration file for stockflight.
 
 See README.md or https://github.com/nicholasadamou/stockflight
 for more information.
