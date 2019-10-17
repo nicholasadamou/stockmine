@@ -78,6 +78,18 @@ $ pip3 install -r requirements.txt
 `config.py` is the main configuration file for `stockflight`. 
 
 ```python
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""stockflight.py - main configuration file for stockflight.
+
+See README.md or https://github.com/nicholasadamou/stockflight
+for more information.
+
+Copyright (C) Nicholas Adamou 2019
+stockflight is released under the Apache 2.0 license. See
+LICENSE for the full license text.
+"""
+
 # Required words that each tweet must contain.
 REQUIRED_NLTK_TOKENS = ["Tesla", "@Tesla", "#Tesla", "tesla", "TSLA", "tsla",
                         "#TSLA", "#tsla", "elonmusk", "Elon", "Musk"]
