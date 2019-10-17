@@ -17,6 +17,7 @@ import sys
 import time
 from time import sleep
 from datetime import datetime
+from os import getenv
 
 import nltk as nltk
 from py_dotenv import read_dotenv
@@ -41,15 +42,6 @@ nltk.download('punkt')
 
 # Read Configuration settings
 try:
-    # The keys for the Twitter app we're using for API requests
-    # (https://apps.twitter.com/app/13239588). Read from environment variables.
-    from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
-
-    # The keys for the Twitter account we're using for API requests.
-    # Read from environment variables.
-    from config import TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
-
-    # Additional configurations
     from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
 except FileNotFoundError:
     print("\n%s 'config.py' does not exist. Please create the file & add the necessary settings to it." % ERROR)
@@ -61,6 +53,16 @@ try:
 except FileNotFoundError:
     print("\n%s '.env' does not exist. Please create the file & add the necessary API keys to it." % ERROR)
     exit(1)
+
+# The keys for the Twitter app we're using for API requests
+# (https://apps.twitter.com/app/13239588). Read from environment variables.
+TWITTER_CONSUMER_KEY = getenv('TWITTER_CONSUMER_KEY')
+TWITTER_CONSUMER_SECRET = getenv('TWITTER_CONSUMER_SECRET')
+
+# The keys for the Twitter account we're using for API requests.
+# Read from environment variables.
+TWITTER_ACCESS_TOKEN = getenv('TWITTER_ACCESS_TOKEN')
+TWITTER_ACCESS_TOKEN_SECRET = getenv('TWITTER_ACCESS_TOKEN_SECRET')
 
 # The duration of the smallest backoff step in seconds.
 BACKOFF_STEP_S = 0.1

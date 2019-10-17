@@ -78,16 +78,6 @@ $ pip3 install -r requirements.txt
 `config.py` is the main configuration file for `stockflight`. 
 
 ```python
-# The keys for the Twitter app we're using for API requests
-# (https://apps.twitter.com/app/13239588). Read from environment variables.
-TWITTER_CONSUMER_KEY = ""
-TWITTER_CONSUMER_SECRET = ""
-
-# The keys for the Twitter account we're using for API requests.
-# Read from environment variables.
-TWITTER_ACCESS_TOKEN = ""
-TWITTER_ACCESS_TOKEN_SECRET = ""
-
 # Required words that each tweet must contain.
 REQUIRED_NLTK_TOKENS = ["Tesla", "@Tesla", "#Tesla", "tesla", "TSLA", "tsla",
                         "#TSLA", "#tsla", "elonmusk", "Elon", "Musk"]
@@ -107,9 +97,13 @@ USERS = ["@elonmusk", "@cnbc", "@benzinga", "@stockwits",
          "@BuzzFeed", "@nytimes"]
 ```
 
-`.env` is the file used to store Google Cloud's service account key PATH.
+`.env` is the file used to store API keys.
 
 ```shell
+TWITTER_CONSUMER_KEY=
+TWITTER_CONSUMER_SECRET=
+TWITTER_ACCESS_TOKEN=
+TWITTER_ACCESS_TOKEN_SECRET=
 GOOGLE_APPLICATION_CREDENTIALS=
 ```
 

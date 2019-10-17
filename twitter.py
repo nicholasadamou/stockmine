@@ -17,7 +17,7 @@ import time
 from os import getenv
 from random import randint
 
-from config import USERS, REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS
+from py_dotenv import read_dotenv
 
 try:
     import urllib.parse as urlparse
@@ -34,19 +34,27 @@ from twitterlistener import API_RETRY_DELAY_S, API_RETRY_COUNT, API_RETRY_ERRORS
 
 # Read Configuration settings
 try:
-    # The keys for the Twitter app we're using for API requests
-    # (https://apps.twitter.com/app/13239588). Read from environment variables.
-    from config import TWITTER_CONSUMER_KEY, TWITTER_CONSUMER_SECRET
-
-    # The keys for the Twitter account we're using for API requests.
-    # Read from environment variables.
-    from config import TWITTER_ACCESS_TOKEN, TWITTER_ACCESS_TOKEN_SECRET
-
-    # Additional configurations
-    from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
+   from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
 except FileNotFoundError:
     print("\n%s config.py does not exist. Please create the file & add the necessary settings to it." % ERROR)
     exit(1)
+
+# Read API keys
+try:
+    read_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+except FileNotFoundError:
+    print("\n%s '.env' does not exist. Please create the file & add the necessary API keys to it." % ERROR)
+    exit(1)
+
+# The keys for the Twitter app we're using for API requests
+# (https://apps.twitter.com/app/13239588). Read from environment variables.
+TWITTER_CONSUMER_KEY = getenv('TWITTER_CONSUMER_KEY')
+TWITTER_CONSUMER_SECRET = getenv('TWITTER_CONSUMER_SECRET')
+
+# The keys for the Twitter account we're using for API requests.
+# Read from environment variables.
+TWITTER_ACCESS_TOKEN = getenv('TWITTER_ACCESS_TOKEN')
+TWITTER_ACCESS_TOKEN_SECRET = getenv('TWITTER_ACCESS_TOKEN_SECRET')
 
 # The URL pattern for links to tweets.
 TWEET_URL = "https://twitter.com/%s/status/%s"
