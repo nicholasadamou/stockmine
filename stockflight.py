@@ -253,6 +253,15 @@ if __name__ == "__main__":
         print("%s TWITTER_ACCESS_TOKEN_SECRET = %s" % (OK, TWITTER_ACCESS_TOKEN_SECRET))
         print()
 
+        if args.keywords:
+            print("%s KEYWORDS: %s" % (OK, args.keywords))
+
+        if args.file:
+            print("%s FILE: %s" % (OK, args.file))
+
+        if args.url:
+            print("%s URL: %s" % (OK, args.url))
+
         if args.required_keywords and args.ignored_keywords:
             print("%s REQUIRED_KEYWORDS = %s" % (OK, args.required_keywords))
             print("%s IGNORED_KEYWORDS = %s" % (OK, args.ignored_keywords))
