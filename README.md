@@ -73,41 +73,7 @@ There are a few library dependencies, which you can install using
 $ pip3 install -r requirements.txt
 ```
 
-### 3. Set up `config.py` & `.env`
-
-`config.py` is the main configuration file for `stockflight`. 
-
-```python
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""config.py - main configuration file for stockflight.
-
-See README.md or https://github.com/nicholasadamou/stockflight
-for more information.
-
-Copyright (C) Nicholas Adamou 2019
-stockflight is released under the Apache 2.0 license. See
-LICENSE for the full license text.
-"""
-
-# Required words that each tweet must contain.
-REQUIRED_NLTK_TOKENS = ["Tesla", "@Tesla", "#Tesla", "tesla", "TSLA", "tsla",
-                        "#TSLA", "#tsla", "elonmusk", "Elon", "Musk"]
-
-# Words that each tweet must not contain.
-IGNORED_NLTK_TOKENS = ["win", "Win", "giveaway", "Giveaway"]
-
-# List of target users to listen for tweets from.
-USERS = ["@elonmusk", "@cnbc", "@benzinga", "@stockwits",
-         "@Newsweek", "@WashingtonPost", "@breakoutstocks", "@bespokeinvest",
-         "@WSJMarkets", "@stephanie_link", "@nytimesbusiness", "@IBDinvestors",
-         "@WSJDealJournal", "@jimcramer", "@TheStalwart", "@TruthGundlach",
-         "@Carl_C_Icahn", "@ReformedBroker", "@bespokeinvest", "@stlouisfed",
-         "@muddywatersre", "@mcuban", "@AswathDamodaran", "@elerianm",
-         "@MorganStanley", "@ianbremmer", "@GoldmanSachs", "@Wu_Tang_Finance",
-         "@Schuldensuehner", "@NorthmanTrader", "@Frances_Coppola",
-         "@BuzzFeed", "@nytimes"]
-```
+### 3. Set up `.env`
 
 `.env` is the file used to store API keys.
 
@@ -133,12 +99,6 @@ Run `stockflight` to start mining and analyzing tweets from specific users speci
 $ python3 stockflight.py --file users.txt
 ```
 
-Run `stockflight` to start mining and analyzing tweets from specific users scrapped from a URL.
-
-```shell
-$ python3 stockflight.py --url https://finance.yahoo.com/quote/TSLA?p=TSLA
-```
-
 Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page.
 
 ```sh
@@ -154,22 +114,34 @@ $ python3 stockflight.py --symbol TSLA
 ### CLI options
 
 ```
-usage: stockflight.py [-h] [-k KEYWORDS] [-c COUNT] [-V]
+usage: stockflight.py [-h] [-k KEYWORDS]
+                      [--required-keywords REQUIRED_KEYWORDS]
+                      [--ignored-keywords IGNORED_KEYWORDS] [-f FILE] [-u URL]
+                      [-s SYMBOL] [-n] [--frequency FREQUENCY]
+                      [--follow-links] [-V]
 
 optional arguments:
-  -h, --help            show this help message and exit.
+  -h, --help            show this help message and exit
   -k KEYWORDS, --keywords KEYWORDS
                         Use keywords to search for in Tweets instead of feeds.
                         Separated by comma, case insensitive, spaces are ANDs
-                        commas are ORs. Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX
-  -f FILE, --file FILE
-                        Use Twitter User IDs from file.
-  -u URL, --url URL
-                        Scrap Twitter User IDs from URL.
+                        commas are ORs. Example: TSLA,'Elon
+                        Musk',Musk,Tesla,SpaceX
+  --required-keywords REQUIRED_KEYWORDS
+                        Words that each tweet must contain. Separated by
+                        comma, case insensitive, spaces are ANDs commas are
+                        ORs. Example: Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSL
+                        A,#tsla,'elonmusk',Elon,Musk
+  --ignored-keywords IGNORED_KEYWORDS
+                        Words that each tweet must not contain. Separated by
+                        comma, case insensitive, spaces are ANDs commas are
+                        ORs. Example: win,Win,giveaway,Giveaway
+  -f FILE, --file FILE  Use Twitter User IDs from file.
+  -u URL, --url URL     Scrap Twitter User IDs from URL.
   -s SYMBOL, --symbol SYMBOL
-                        Stock symbol to use when fetching stock data., example: TSLA
-  -n, --news-headlines
-                        Get news headlines instead of Twitter using stock.
+                        Stock symbol to use when fetching stock data.,
+                        example: TSLA
+  -n, --news-headlines  Get news headlines instead of Twitter using stock
                         symbol, example: TSLA
   --frequency FREQUENCY
                         How often in seconds to retrieve news headlines.
@@ -177,6 +149,7 @@ optional arguments:
   --follow-links        Follow links on news headlines and scrape relevant
                         text from landing page.
   -V, --version         Prints version and exits.
+
   ```
 
 ## License

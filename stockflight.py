@@ -40,13 +40,6 @@ if sys.version_info >= (3, 0):
 # for tokenizing tweet text.
 nltk.download('punkt')
 
-# Read Configuration settings
-try:
-    from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
-except FileNotFoundError:
-    print("\n%s 'config.py' does not exist. Please create the file & add the necessary settings to it." % ERROR)
-    exit(1)
-
 # Read API keys
 try:
     read_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -83,8 +76,9 @@ FILE_NAME = 'stockflight' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
 class Main:
     """A wrapper for the main application logic and retry loop."""
 
-    def __init__(self):
+    def __init__(self, args):
         self.twitter = Twitter()
+        self.args = args
 
     def twitter_callback(self, tweet):
         """Analyzes tweets"""
@@ -98,14 +92,18 @@ class Main:
         print("%s NLTK Tokens: %s" % (OK, str(tokens)))
 
         # Skip if required NLTK tokens are not present within the tweet's body.
-        if not any(token in REQUIRED_NLTK_TOKENS for token in tokens):
-            print("%s Tweet does not contain required NLTK tokens, skipping." % WARNING)
-            return
+        if args.required_keywords:
+            required_keywords = args.required_keywords.split(',')
+            if not any(token in required_keywords for token in tokens):
+                print("%s Tweet does not contain required NLTK tokens, skipping." % WARNING)
+                return
 
         # Skip if ignored NLTK tokens are present within the tweet's body.
-        if any(token in IGNORED_NLTK_TOKENS for token in tokens):
-            print("%s Tweet contains an ignored NLTK token, skipping." % WARNING)
-            return
+        if args.ignored_keywords:
+            ignored_keywords = args.ignored_keywords.split(',')
+            if any(token in ignored_keywords for token in tokens):
+                print("%s Tweet contains an ignored NLTK token, skipping." % WARNING)
+                return
 
         # strip out hash-tags for language processing.
         text = re.sub(r"[#|@$]\S+", "", tweet['text']).strip()
@@ -167,14 +165,14 @@ class Main:
         print("%s Waiting for %.1f seconds." % (WARNING, delay))
         sleep(delay)
 
-    def run(self, args):
+    def run(self):
         """Runs the main retry loop with exponential backoff."""
 
         tries = 0
         while True:
 
             # The session blocks until an error occurs.
-            self.run_session(args)
+            self.run_session(self.args)
 
             # Remember the first time a backoff sequence starts.
             now = datetime.now()
@@ -215,6 +213,14 @@ if __name__ == "__main__":
                         help="Use keywords to search for in Tweets instead of feeds. "
                              "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
                              "Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX")
+    parser.add_argument("--required-keywords", metavar="REQUIRED_KEYWORDS",
+                        help="Words that each tweet must contain. "
+                             "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
+                             "Example: Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',Elon,Musk")
+    parser.add_argument("--ignored-keywords", metavar="IGNORED_KEYWORDS",
+                        help="Words that each tweet must not contain. "
+                             "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
+                             "Example: win,Win,giveaway,Giveaway")
     parser.add_argument("-f", "--file", metavar="FILE",
                         help="Use Twitter User IDs from file.")
     parser.add_argument("-u", "--url", metavar="URL",
@@ -239,21 +245,19 @@ if __name__ == "__main__":
     # Handle CLI arguments
 
     # python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
+    # python3 stockflight.py -f users.txt
     if args.keywords or args.file or args.url:
         print("%s TWITTER_CONSUMER_KEY = %s" % (OK, TWITTER_CONSUMER_KEY))
         print("%s TWITTER_CONSUMER_SECRET = %s" % (OK, TWITTER_CONSUMER_SECRET))
         print("%s TWITTER_ACCESS_TOKEN = %s" % (OK, TWITTER_ACCESS_TOKEN))
         print("%s TWITTER_ACCESS_TOKEN_SECRET = %s" % (OK, TWITTER_ACCESS_TOKEN_SECRET))
-        print("%s REQUIRED NLTK TOKENS = %s" % (OK, REQUIRED_NLTK_TOKENS))
-        print("%s IGNORED NLTK TOKENS = %s" % (OK, IGNORED_NLTK_TOKENS))
-        print("%s USERS = %s" % (OK, USERS))
         print()
 
         monitor = Monitor()
         monitor.start()
 
         try:
-            Main().run(args)
+            Main(args=args).run()
         finally:
             monitor.stop()
     else:
@@ -285,7 +289,7 @@ if __name__ == "__main__":
             frequency = args.frequency
 
             try:
-                news_listener = HeadlineListener(symbol=symbol, frequency=frequency, follow_links=args.follow_links)
+                news_listener = HeadlineListener(args=args, symbol=symbol, frequency=frequency, follow_links=args.follow_links)
             except KeyboardInterrupt:
                 print("%s Ctrl-c keyboard interrupt, exiting." % WARNING)
                 sys.exit(0)
@@ -296,7 +300,7 @@ if __name__ == "__main__":
             frequency = args.frequency
 
             try:
-                news_listener = HeadlineListener(symbol=symbol, frequency=frequency)
+                news_listener = HeadlineListener(args=args, symbol=symbol, frequency=frequency)
             except KeyboardInterrupt:
                 print("%s Ctrl-c keyboard interrupt, exiting." % WARNING)
                 sys.exit(0)

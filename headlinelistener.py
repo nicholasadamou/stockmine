@@ -17,7 +17,6 @@ from datetime import datetime
 import nltk
 
 from analysis import Analysis
-from config import IGNORED_NLTK_TOKENS, REQUIRED_NLTK_TOKENS
 from logs import OK, WARNING
 from yahoo import scrap_yahoo_finance
 
@@ -29,13 +28,20 @@ nltk.download('punkt')
 class HeadlineListener:
     """Listens for relevant headlines on Yahoo Finance about a company with a given frequency."""
 
-    def __init__(self, symbol=None, frequency=120, follow_links=False):
+    def __init__(self, args, symbol=None, frequency=120, follow_links=False):
+        self.args = args
         self.symbol = symbol
         self.follow_links = follow_links
         self.headlines = []
         self.frequency = frequency
 
         analysis = Analysis()
+
+        if args.ignored_keywords:
+            ignored_keywords = args.ignored_keywords.split(',')
+
+        if args.required_keywords:
+            required_keywords = args.required_keywords.split(',')
 
         while True:
             news_headlines = scrap_yahoo_finance(symbol, follow_links)
@@ -54,24 +60,24 @@ class HeadlineListener:
                     tokens = nltk.word_tokenize(text_for_tokens)
                     print("%s NLTK Tokens: %s" % (OK, str(tokens)))
 
-                    if len(IGNORED_NLTK_TOKENS) > 0:
+                    if len(ignored_keywords) > 0:
                         # Make sure [tokens] does not contain any of the ignored NLTK tokens.
-                        for token in IGNORED_NLTK_TOKENS:
+                        for token in ignored_keywords:
                             if token in tokens:
                                 print("%s Token %s is IGNORED" % (WARNING, token))
                                 continue
 
-                    if len(REQUIRED_NLTK_TOKENS) > 0:
+                    if len(required_keywords) > 0:
                         # Make sure [tokens] does contains all required NLTK tokens.
                         contains_token = False
-                        for token in REQUIRED_NLTK_TOKENS:
+                        for token in required_keywords:
                             if token in tokens:
                                 contains_token = True
                                 break
 
                         if not contains_token:
-                            print("%s Text does not contain %s from 'config.py', skipping." %
-                                  (WARNING, REQUIRED_NLTK_TOKENS))
+                            print("%s Text does not contain %s', skipping." %
+                                  (WARNING, required_keywords))
                             continue
 
                     # Obtain sentiment.

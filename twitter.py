@@ -32,13 +32,6 @@ from tweepy import API
 from logs import *
 from twitterlistener import API_RETRY_DELAY_S, API_RETRY_COUNT, API_RETRY_ERRORS, TwitterListener
 
-# Read Configuration settings
-try:
-   from config import REQUIRED_NLTK_TOKENS, IGNORED_NLTK_TOKENS, USERS
-except FileNotFoundError:
-    print("\n%s config.py does not exist. Please create the file & add the necessary settings to it." % ERROR)
-    exit(1)
-
 # Read API keys
 try:
     read_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
@@ -102,9 +95,8 @@ def get_twitter_users_from_file(file):
     try:
         f = open(file, "rt", encoding='utf-8')
 
-        for line in f.readlines():
-            for user in line.strip().split(','):
-                users.append(user)
+        for user in f.readlines():
+            users.append(user)
         print("%s FOUND USERS: %s" % (OK, users))
 
         f.close()
@@ -223,8 +215,9 @@ class Twitter:
                 keywords = args.keywords.split(',')
 
                 # Append list of required NLTK tokens to [keywords].
-                if REQUIRED_NLTK_TOKENS:
-                    keywords.append(",".join(REQUIRED_NLTK_TOKENS))
+                if args.required_keywords:
+                    required_keywords = args.required_keywords.split(',')
+                    keywords.append(required_keywords)
 
                 print("%s Searching for tweets containing %s" % (WARNING, keywords))
                 twitter_stream.filter(track=keywords, languages=['en'])
@@ -240,10 +233,6 @@ class Twitter:
                 file = args.file
                 users = get_twitter_users_from_file(file)
 
-                # Append list of Twitter Users from 'config.py'.
-                print("%s Append list of Twitter User IDs from 'config.py'" % WARNING)
-                users = list(set(users + USERS))
-
                 # Stream a list of Twitter users' FEEDs.
                 print("%s Searching for tweets from %s" % (WARNING, users))
                 stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=users)
@@ -258,9 +247,6 @@ class Twitter:
                 # Obtain a list of Twitter User IDs from URL.
                 url = args.url
                 users = scrap_twitter_users_from_url(url)
-
-                # Append list of Twitter Users from 'config.py'.
-                users = list(set(users + USERS))
 
                 # Stream a list of Twitter users' FEEDs.
                 print("%s Searching for tweets from %s" % (WARNING, users))
