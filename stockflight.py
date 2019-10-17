@@ -253,6 +253,19 @@ if __name__ == "__main__":
         print("%s TWITTER_ACCESS_TOKEN_SECRET = %s" % (OK, TWITTER_ACCESS_TOKEN_SECRET))
         print()
 
+        if args.required_keywords and args.ignored_keywords:
+            print("%s REQUIRED_KEYWORDS = %s" % (OK, args.required_keywords))
+            print("%s IGNORED_KEYWORDS = %s" % (OK, args.ignored_keywords))
+            print()
+
+        if args.required_keywords and not args.ignored_keywords:
+            print("%s REQUIRED_KEYWORDS = %s" % (OK, args.required_keywords))
+            print()
+
+        if args.ignored_keywords and not args.required_keywords:
+            print("%s IGNORED_KEYWORDS = %s" % (OK, args.ignored_keywords))
+            print()
+
         monitor = Monitor()
         monitor.start()
 
