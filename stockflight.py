@@ -38,7 +38,7 @@ if sys.version_info >= (3, 0):
 
 # Download the 'punkt' package for NLTK
 # for tokenizing tweet text.
-nltk.download('punkt')
+nltk.download('punkt', quiet=True)
 
 # Read API keys
 try:
@@ -214,11 +214,12 @@ if __name__ == "__main__":
                              "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
                              "Example: TSLA,'Elon Musk',Musk,Tesla,SpaceX")
     parser.add_argument("--required-keywords", metavar="REQUIRED_KEYWORDS",
-                        help="Words that each tweet must contain. "
-                             "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
+                        help="Words that each tweet from a user's feed must contain. "
+                             "Separated by comma, case insensitive. "
                              "Example: Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',Elon,Musk")
     parser.add_argument("--ignored-keywords", metavar="IGNORED_KEYWORDS",
                         help="Words that each tweet must not contain. "
+                             "Can be used with feeds or keywords. "
                              "Separated by comma, case insensitive, spaces are ANDs commas are ORs. "
                              "Example: win,Win,giveaway,Giveaway")
     parser.add_argument("-f", "--file", metavar="FILE",
@@ -227,7 +228,7 @@ if __name__ == "__main__":
                         help="Scrap Twitter User IDs from URL.")
     parser.add_argument("-s", "--symbol", metavar="SYMBOL",
                         help="Stock symbol to use when fetching stock data., example: TSLA")
-    parser.add_argument("-n", "--news-headlines", action="store_true",
+    parser.add_argument("--news-headlines", action="store_true",
                         help="Get news headlines instead of Twitter using stock symbol, example: TSLA")
     parser.add_argument("--frequency", metavar="FREQUENCY", default=120, type=int,
                         help="How often in seconds to retrieve news headlines. (default: 120 sec)")
@@ -247,6 +248,12 @@ if __name__ == "__main__":
     # python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
     # python3 stockflight.py -f users.txt
     if args.keywords or args.file or args.url:
+        # Make sure the correct arguments are passed.
+        if args.news_headlines or args.follow_links or args.symbol:
+            print("%s Arguments [NEWS-HEADLINES, SYMBOL, or FOLLOW-LINKS] cannot be used with argument(s) [KEYWORDS, "
+                  "FILE, or URL]" % ERROR)
+            exit(1)
+
         print("%s TWITTER_CONSUMER_KEY = %s" % (OK, TWITTER_CONSUMER_KEY))
         print("%s TWITTER_CONSUMER_SECRET = %s" % (OK, TWITTER_CONSUMER_SECRET))
         print("%s TWITTER_ACCESS_TOKEN = %s" % (OK, TWITTER_ACCESS_TOKEN))
@@ -275,6 +282,10 @@ if __name__ == "__main__":
             print("%s IGNORED_KEYWORDS = %s" % (OK, args.ignored_keywords))
             print()
 
+        if args.keywords and args.required_keywords:
+            print("%s KEYWORDS and REQUIRED_KEYWORDS cannot be used in tandom." % ERROR)
+            exit(1)
+
         monitor = Monitor()
         monitor.start()
 
@@ -286,6 +297,8 @@ if __name__ == "__main__":
         # python3 stockflight.py --symbol TSLA
         if args.symbol and not args.news_headlines:
             symbol = args.symbol
+
+            print("%s SYMBOL = %s" % (OK, symbol))
 
             results = scrap_company_data(symbol)
             print("%s FOUND DATA for %s: %s" % (OK, symbol, results))
@@ -310,6 +323,12 @@ if __name__ == "__main__":
             symbol = args.symbol
             frequency = args.frequency
 
+            print("%s SYMBOL = %s" % (OK, symbol))
+            print("%s NEWS-HEADLINES = %s" % (OK, args.news_headlines))
+            print("%s FOLLOW-LINKS = %s" % (OK, args.follow_links))
+            print("%s FREQUENCY = %s sec." % (OK, args.frequency))
+            print()
+
             try:
                 news_listener = HeadlineListener(args=args, symbol=symbol, frequency=frequency, follow_links=args.follow_links)
             except KeyboardInterrupt:
@@ -320,6 +339,12 @@ if __name__ == "__main__":
         elif args.symbol and args.news_headlines and not args.follow_links:
             symbol = args.symbol
             frequency = args.frequency
+
+            print("%s SYMBOL = %s" % (OK, symbol))
+            print("%s NEWS-HEADLINES = %s" % (OK, args.news_headlines))
+            print("%s FOLLOW-LINKS = %s" % (OK, args.follow_links))
+            print("%s FREQUENCY = %s sec." % (OK, args.frequency))
+            print()
 
             try:
                 news_listener = HeadlineListener(args=args, symbol=symbol, frequency=frequency)

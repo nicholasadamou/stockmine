@@ -93,10 +93,35 @@ Run `stockflight` to start mining and analyzing tweets using keywords.
 $ python3 stockflight.py --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX
 ```
 
+Run `stockflight` to start mining and analyzing tweets using keywords along with a set of ignored keywords.
+
+```shell
+$ python3 stockflight.py \
+    --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX \
+    --ignored-keywords win,Win,giveaway,Giveaway
+```
+
 Run `stockflight` to start mining and analyzing tweets from specific users specified in a file.
 
 ```shell
 $ python3 stockflight.py --file users.txt
+```
+
+Run `stockflight` to start mining and analyzing tweets from specific users specified in a file along with a set of required keywords that each tweet from those user's feeds must contain.
+
+```shell
+$ python3 stockflight.py \
+    --file users.txt \
+    --required-keywords Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',Elon,Musk
+```
+
+Run `stockflight` to start mining and analyzing tweets from specific users specified in a file along with a set of required keywords that each tweet from those user's feeds must contain, plus ignored keywords.
+
+```shell
+$ python3 stockflight.py \
+    --file users.txt \
+    --required-keywords Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',Elon,Musk \
+    --ignored-keywords win,Win,giveaway,Giveaway
 ```
 
 Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page.
@@ -117,7 +142,7 @@ $ python3 stockflight.py --symbol TSLA
 usage: stockflight.py [-h] [-k KEYWORDS]
                       [--required-keywords REQUIRED_KEYWORDS]
                       [--ignored-keywords IGNORED_KEYWORDS] [-f FILE] [-u URL]
-                      [-s SYMBOL] [-n] [--frequency FREQUENCY]
+                      [-s SYMBOL] [--news-headlines] [--frequency FREQUENCY]
                       [--follow-links] [-V]
 
 optional arguments:
@@ -128,20 +153,21 @@ optional arguments:
                         commas are ORs. Example: TSLA,'Elon
                         Musk',Musk,Tesla,SpaceX
   --required-keywords REQUIRED_KEYWORDS
-                        Words that each tweet must contain. Separated by
-                        comma, case insensitive, spaces are ANDs commas are
-                        ORs. Example: Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSL
-                        A,#tsla,'elonmusk',Elon,Musk
+                        Words that each tweet from a user's feed must contain.
+                        Separated by comma, case insensitive. Example: Tesla,@
+                        Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',El
+                        on,Musk
   --ignored-keywords IGNORED_KEYWORDS
-                        Words that each tweet must not contain. Separated by
-                        comma, case insensitive, spaces are ANDs commas are
-                        ORs. Example: win,Win,giveaway,Giveaway
+                        Words that each tweet must not contain. Can be used
+                        with feeds or keywords. Separated by comma, case
+                        insensitive, spaces are ANDs commas are ORs. Example:
+                        win,Win,giveaway,Giveaway
   -f FILE, --file FILE  Use Twitter User IDs from file.
   -u URL, --url URL     Scrap Twitter User IDs from URL.
   -s SYMBOL, --symbol SYMBOL
                         Stock symbol to use when fetching stock data.,
                         example: TSLA
-  -n, --news-headlines  Get news headlines instead of Twitter using stock
+  --news-headlines      Get news headlines instead of Twitter using stock
                         symbol, example: TSLA
   --frequency FREQUENCY
                         How often in seconds to retrieve news headlines.
@@ -149,7 +175,6 @@ optional arguments:
   --follow-links        Follow links on news headlines and scrape relevant
                         text from landing page.
   -V, --version         Prints version and exits.
-
   ```
 
 ## License

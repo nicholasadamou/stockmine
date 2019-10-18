@@ -16,13 +16,16 @@ from datetime import datetime
 
 import nltk
 
-from analysis import Analysis
+from analysis import Analysis, compile_opinion_text
 from logs import OK, WARNING
-from yahoo import scrap_yahoo_finance
+from yahoo import scrap_yahoo_finance, scrap_company_name
 
 # Download the 'punkt' package for NLTK
 # for tokenizing tweet text.
-nltk.download('punkt')
+nltk.download('punkt', quiet=True)
+
+# The file-name of the outputted .csv file
+FILE_NAME = 'stockflight' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
 
 
 class HeadlineListener:
@@ -37,14 +40,9 @@ class HeadlineListener:
 
         analysis = Analysis()
 
-        if args.ignored_keywords:
-            ignored_keywords = args.ignored_keywords.split(',')
-
-        if args.required_keywords:
-            required_keywords = args.required_keywords.split(',')
-
         while True:
             news_headlines = scrap_yahoo_finance(symbol, follow_links)
+            data = scrap_company_name(symbol=args.symbol)
 
             for headline, url in news_headlines:
                 if headline not in self.headlines:
@@ -60,15 +58,17 @@ class HeadlineListener:
                     tokens = nltk.word_tokenize(text_for_tokens)
                     print("%s NLTK Tokens: %s" % (OK, str(tokens)))
 
-                    if len(ignored_keywords) > 0:
-                        # Make sure [tokens] does not contain any of the ignored NLTK tokens.
+                    # Make sure [tokens] does not contain any of the ignored NLTK tokens.
+                    if args.ignored_keywords:
+                        ignored_keywords = args.ignored_keywords.split(',')
                         for token in ignored_keywords:
                             if token in tokens:
                                 print("%s Token %s is IGNORED" % (WARNING, token))
                                 continue
 
-                    if len(required_keywords) > 0:
-                        # Make sure [tokens] does contains all required NLTK tokens.
+                    # Make sure [tokens] does contains all required NLTK tokens.
+                    if args.required_keywords:
+                        required_keywords = args.required_keywords.split(',')
                         contains_token = False
                         for token in required_keywords:
                             if token in tokens:
@@ -82,7 +82,30 @@ class HeadlineListener:
 
                     # Obtain sentiment.
                     sentiment = analysis.extract_sentiment(headline)
-                    print("%s Using sentiment %s for %s" % (OK, sentiment, headline))
+                    print("%s Using sentiment %s for '%s'" % (OK, sentiment, headline))
+
+                    # Write results to [.csv] file.
+                    print('\n%s Writing results to %s' % (WARNING, FILE_NAME))
+                    f = open(FILE_NAME, "a")
+
+                    # Write fields to [.csv]
+                    fields = ['symbol', 'sentiment', 'opinion', 'headline', 'url']
+                    if ",".join(fields) not in open(FILE_NAME).read():
+                        print("%s fields: %s" % (OK, fields))
+                        f.write(",".join(fields) + "\n")
+
+                    # Write individual row to [.csv].
+                    # Extract individual row data.
+                    symbol = data["symbol"]
+                    name = data["name"]
+                    opinion = compile_opinion_text(name=name, symbol=symbol, sentiment=sentiment)
+
+                    # Construct individual row.
+                    row = symbol + "," + name + "," + str(sentiment) + "," + opinion + "," + headline + "," + url
+
+                    # Write row data to [.csv].
+                    print("%s row: %s" % (OK, row))
+                    f.write(row + "\n")
 
             print("%s Waiting %s seconds" % (WARNING, self.frequency))
             time.sleep(self.frequency)

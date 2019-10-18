@@ -96,7 +96,7 @@ def get_twitter_users_from_file(file):
         f = open(file, "rt", encoding='utf-8')
 
         for user in f.readlines():
-            users.append(user)
+            users.append(user.rstrip())
         print("%s FOUND USERS: %s" % (OK, users))
 
         f.close()

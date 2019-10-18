@@ -119,7 +119,6 @@ class Analysis:
         companies = []
 
         for entity in entities:
-
             # Use the Freebase ID of the entity to find company data. Skip any
             # entity which doesn't have a Freebase ID (unless we find one via
             # the Twitter handle).
