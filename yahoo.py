@@ -50,8 +50,7 @@ def scrap_yahoo_finance(ticker, follow_links=False):
     parsed_uri = urlparse.urljoin(query_url, '/')
 
     try:
-        request = requests.get(query_url)
-        html = request.text
+        html = requests.get(query_url).text
         soup = BeautifulSoup(html, 'html.parser')
 
         headlines = soup.findAll('h3')
@@ -91,9 +90,7 @@ def crawl_page_text(url):
     try:
         print("%s Using URL: %s" % (OK, url))
 
-        request = requests.get(url)
-
-        html = request.text
+        html = requests.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
 
         paragraphs = soup.findAll('p')
@@ -113,11 +110,11 @@ def crawl_page_text(url):
         pass
 
 
-def scrap_company_data(symbol):
-    """Scraps Yahoo Finance for stock price data pertaining to a given ticker symbol."""
+def request(symbol, url):
+    """Makes a request to a web-server and returns its response."""
 
     # Add stock symbol to URL.
-    query_url = re.sub("SYMBOL", symbol, YAHOO_FINANCE_STOCK_QUERY_URL)
+    query_url = re.sub("SYMBOL", symbol, url)
     print("%s Yahoo Finance query: %s" % (OK, query_url))
 
     try:
@@ -125,6 +122,15 @@ def scrap_company_data(symbol):
     except (requests.HTTPError, requests.ConnectionError, requests.ConnectTimeout) as request_execption:
         print("%s Exception: Failed to retrieve data from %s because: %s" % (ERROR, query_url, request_execption))
         raise
+
+    return response
+
+
+def scrap_company_data(symbol):
+    """Scraps Yahoo Finance for stock price data pertaining to a given ticker symbol."""
+
+    # Obtain response from Yahoo Finance
+    response = request(symbol=symbol, url=YAHOO_FINANCE_STOCK_QUERY_URL)
 
     # Build dictionary containing results.
     data = {
@@ -152,15 +158,8 @@ def scrap_company_name(symbol):
     # The dictionary containing the target company's name and ticker symbol.
     data = {}
 
-    # Add stock symbol to URL.
-    query_url = re.sub("SYMBOL", symbol, YAHOO_FINANCE_STOCK_NAME_QUERY_URL)
-    print("%s Yahoo Finance query: %s" % (OK, query_url))
-
-    try:
-        response = requests.get(query_url).json()
-    except (requests.HTTPError, requests.ConnectionError, requests.ConnectTimeout) as request_execption:
-        print("%s Exception: Failed to retrieve data from %s because: %s" % (ERROR, query_url, request_execption))
-        raise
+    # Obtain response from Yahoo Finance
+    response = request(symbol=symbol, url=YAHOO_FINANCE_STOCK_NAME_QUERY_URL)
 
     for company in response['ResultSet']['Result']:
         if company['symbol'] == symbol:
