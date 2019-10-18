@@ -127,7 +127,18 @@ $ python3 stockflight.py \
 Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page.
 
 ```sh
-$ python3 stockflight.py --news-headlines --follow-links --symbol TSLA
+$ python3 stockflight.py --symbol TSLA \
+    --news-headlines \
+    --follow-links
+```
+
+Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page with a given frequency.
+
+```sh
+$ python3 stockflight.py --symbol TSLA \
+    --news-headlines \
+    --follow-links \
+    --frequency 160
 ```
 
 Run `stockflight` to fetch stock data pertaining to a given company.
