@@ -200,7 +200,7 @@ class Main:
 
 if __name__ == "__main__":
     # Print banner and app description
-    custom_fig = Figlet(font='shadow')
+    custom_fig = Figlet(font='slant')
     print(custom_fig.renderText('StockFlight'))
     print("Crowd-sourced stock analyzer and stock predictor using\n"
           "Google Natural Language Processing API, Twitter, and\n"
