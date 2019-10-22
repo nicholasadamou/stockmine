@@ -8,7 +8,7 @@ Crowd-sourced stock analyzer and stock predictor using Google's [Cloud Natural L
 
 ---
 
-## 🤔 Why make '_Stock Flight_'?
+## 🤔 Why make '_Stock Mine_'?
 
 This project was created for the 2019 [HackUIowa](https://hackuiowa-2019.devpost.com/) event. 
 
