@@ -1,4 +1,4 @@
-#!/Users/nicholas/dev/stockflight/venv/bin/python
+#!/Users/nicholas/dev/stockmine/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

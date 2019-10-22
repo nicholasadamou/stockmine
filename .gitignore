@@ -92,5 +92,5 @@ ENV/
 .vscode
 
 # misc.
-stockflight*.json
+stockmine*.json
 *.csv

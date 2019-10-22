@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """analysis.py - analyze tweets on Twitter mentioning any publicly traded companies.
 
-See README.md or https://github.com/nicholasadamou/stockflight
+See README.md or https://github.com/nicholasadamou/stockmine
 for more information.
 
 Copyright (C) Nicholas Adamou 2019
-stockflight is released under the Apache 2.0 license. See
+stockmine is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
 

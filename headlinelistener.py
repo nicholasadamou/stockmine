@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 """headlinelistener.py - listens for relevant headlines on Yahoo Finance about a company with a given frequency.
 
-See README.md or https://github.com/nicholasadamou/stockflight
+See README.md or https://github.com/nicholasadamou/stockmine
 for more information.
 
 Copyright (C) Nicholas Adamou 2019
-stockflight is released under the Apache 2.0 license. See
+stockmine is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
 
@@ -25,7 +25,7 @@ from yahoo import scrap_yahoo_finance, scrap_company_name
 nltk.download('punkt', quiet=True)
 
 # The file-name of the outputted .csv file
-FILE_NAME = 'stockflight' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
+FILE_NAME = 'stockmine' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
 
 
 class HeadlineListener:

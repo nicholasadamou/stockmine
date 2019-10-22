@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""stockflight.py - main driver program of stockflight.
+"""stockmine.py - main driver program of stockmine.
 
-See README.md or https://github.com/nicholasadamou/stockflight
+See README.md or https://github.com/nicholasadamou/stockmine
 for more information.
 
 Copyright (C) Nicholas Adamou 2019
-stockflight is released under the Apache 2.0 license. See
+stockmine is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
 
@@ -30,8 +30,8 @@ from monitor import Monitor
 from twitter import Twitter
 from yahoo import scrap_company_data
 
-STOCKFLIGHT_VERSION = '0.1a'
-__version__ = STOCKFLIGHT_VERSION
+stockmine_VERSION = '0.1a'
+__version__ = stockmine_VERSION
 
 if sys.version_info >= (3, 0):
     unicode = str
@@ -70,7 +70,7 @@ MAX_TRIES = 12
 BACKOFF_RESET_S = 30 * 60
 
 # The file-name of the outputted .csv file
-FILE_NAME = 'stockflight' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
+FILE_NAME = 'stockmine' + "_" + time.strftime("%Y%m%d-%H%M%S") + ".csv"
 
 
 class Main:
@@ -201,7 +201,7 @@ class Main:
 if __name__ == "__main__":
     # Print banner and app description
     custom_fig = Figlet(font='slant')
-    print(custom_fig.renderText('StockFlight'))
+    print(custom_fig.renderText('stockmine'))
     print("Crowd-sourced stock analyzer and stock predictor using\n"
           "Google Natural Language Processing API, Twitter, and\n"
           "Wikidata API in order to determine, if at all, how much\n"
@@ -235,7 +235,7 @@ if __name__ == "__main__":
     parser.add_argument("--follow-links", action="store_true",
                         help="Follow links on news headlines and scrape relevant text from landing page.")
     parser.add_argument("-V", "--version", action="version",
-                        version="stockflight v%s" % STOCKFLIGHT_VERSION,
+                        version="stockmine v%s" % stockmine_VERSION,
                         help="Prints version and exits.")
     args = parser.parse_args()
 
@@ -245,8 +245,8 @@ if __name__ == "__main__":
 
     # Handle CLI arguments
 
-    # python3 stockflight.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
-    # python3 stockflight.py -f users.txt
+    # python3 stockmine.py -k TSLA,'Elon Musk',Musk,Tesla,SpaceX
+    # python3 stockmine.py -f users.txt
     if args.keywords or args.file or args.url:
         # Make sure the correct arguments are passed.
         if args.news_headlines or args.follow_links or args.symbol:
@@ -294,7 +294,7 @@ if __name__ == "__main__":
         finally:
             monitor.stop()
     else:
-        # python3 stockflight.py --symbol TSLA
+        # python3 stockmine.py --symbol TSLA
         if args.symbol and not args.news_headlines:
             symbol = args.symbol
 
@@ -318,7 +318,7 @@ if __name__ == "__main__":
             print("%s row: %s" % (OK, row))
             f.write(row)
 
-        # python3 stockflight.py --news-headlines --follow-links --symbol TSLA --frequency 120
+        # python3 stockmine.py --news-headlines --follow-links --symbol TSLA --frequency 120
         elif args.symbol and args.news_headlines and args.follow_links:
             symbol = args.symbol
             frequency = args.frequency
@@ -335,7 +335,7 @@ if __name__ == "__main__":
                 print("%s Ctrl-c keyboard interrupt, exiting." % WARNING)
                 sys.exit(0)
 
-        # python3 stockflight.py --news-headlines --symbol TSLA --frequency 120
+        # python3 stockmine.py --news-headlines --symbol TSLA --frequency 120
         elif args.symbol and args.news_headlines and not args.follow_links:
             symbol = args.symbol
             frequency = args.frequency

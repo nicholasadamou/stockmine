@@ -1,4 +1,4 @@
-#!/Users/nicholas/dev/stockflight/venv/bin/python
+#!/Users/nicholas/dev/stockmine/venv/bin/python
 # EASY-INSTALL-ENTRY-SCRIPT: 'pip==19.0.3','console_scripts','pip3'
 __requires__ = 'pip==19.0.3'
 import re

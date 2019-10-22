@@ -1,6 +1,6 @@
 FROM python:3-stretch
 
-WORKDIR /stockflight
+WORKDIR /stockmine
 
 # Install the dependencies.
 ADD requirements.txt .
@@ -13,4 +13,4 @@ ADD *.py ./
 EXPOSE 80
 
 # Run the app.
-ENTRYPOINT ["python3", "stockflight.py --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX --ignored-keywords win,Win,giveaway,Giveaway"]
+ENTRYPOINT ["python3", "stockmine.py --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX --ignored-keywords win,Win,giveaway,Giveaway"]

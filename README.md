@@ -1,9 +1,9 @@
-# stockflight 🛫
+# stockmine ⛏️
 
 Crowd-sourced stock analyzer and stock predictor using Google's [Cloud Natural Language API](https://cloud.google.com/natural-language/), Twitter, and [Wikidata Query Service](https://query.wikidata.org/) in order to determine how much do emotions affect a stock price?
 
 ![HackUIowa 2019](https://img.shields.io/badge/hackathon-HackUIowa%202019-yellow)
-[![License](https://img.shields.io/github/license/nicholasadamou/stockflight.svg?label=License&maxAge=86400)](./LICENSE)
+[![License](https://img.shields.io/github/license/nicholasadamou/stockmine.svg?label=License&maxAge=86400)](./LICENSE)
 ![Say Thanks](https://img.shields.io/badge/say-thanks-ff69b4.svg)
 
 ---
@@ -87,70 +87,70 @@ GOOGLE_APPLICATION_CREDENTIALS=
 
 ### 4. Run the program using the following examples
 
-Run `stockflight` to start mining and analyzing tweets using keywords.
+Run `stockmine` to start mining and analyzing tweets using keywords.
 
 ```shell
-$ python3 stockflight.py --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX
+$ python3 stockmine.py --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX
 ```
 
-Run `stockflight` to start mining and analyzing tweets using keywords along with a set of ignored keywords.
+Run `stockmine` to start mining and analyzing tweets using keywords along with a set of ignored keywords.
 
 ```shell
-$ python3 stockflight.py \
+$ python3 stockmine.py \
     --keywords TSLA,'Elon Musk',Musk,Tesla,SpaceX \
     --ignored-keywords win,Win,giveaway,Giveaway
 ```
 
-Run `stockflight` to start mining and analyzing tweets from specific users specified in a file.
+Run `stockmine` to start mining and analyzing tweets from specific users specified in a file.
 
 ```shell
-$ python3 stockflight.py --file users.txt
+$ python3 stockmine.py --file users.txt
 ```
 
-Run `stockflight` to start mining and analyzing tweets from specific users specified in a file along with a set of required keywords that each tweet from those user's feeds must contain.
+Run `stockmine` to start mining and analyzing tweets from specific users specified in a file along with a set of required keywords that each tweet from those user's feeds must contain.
 
 ```shell
-$ python3 stockflight.py \
+$ python3 stockmine.py \
     --file users.txt \
     --required-keywords Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',Elon,Musk
 ```
 
-Run `stockflight` to start mining and analyzing tweets from specific users specified in a file along with a set of required keywords that each tweet from those user's feeds must contain, plus ignored keywords.
+Run `stockmine` to start mining and analyzing tweets from specific users specified in a file along with a set of required keywords that each tweet from those user's feeds must contain, plus ignored keywords.
 
 ```shell
-$ python3 stockflight.py \
+$ python3 stockmine.py \
     --file users.txt \
     --required-keywords Tesla,@Tesla,#Tesla,tesla,TSLA,tsla,#TSLA,#tsla,'elonmusk',Elon,Musk \
     --ignored-keywords win,Win,giveaway,Giveaway
 ```
 
-Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page.
+Run `stockmine` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page.
 
 ```sh
-$ python3 stockflight.py --symbol TSLA \
+$ python3 stockmine.py --symbol TSLA \
     --news-headlines \
     --follow-links
 ```
 
-Run `stockflight` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page with a given frequency.
+Run `stockmine` to start mining and analyzing Yahoo Finance news headlines and following headline links and scraping relevant text on landing page with a given frequency.
 
 ```sh
-$ python3 stockflight.py --symbol TSLA \
+$ python3 stockmine.py --symbol TSLA \
     --news-headlines \
     --follow-links \
     --frequency 160
 ```
 
-Run `stockflight` to fetch stock data pertaining to a given company.
+Run `stockmine` to fetch stock data pertaining to a given company.
 
 ```sh
-$ python3 stockflight.py --symbol TSLA
+$ python3 stockmine.py --symbol TSLA
 ```
 
 ### CLI options
 
 ```
-usage: stockflight.py [-h] [-k KEYWORDS]
+usage: stockmine.py [-h] [-k KEYWORDS]
                       [--required-keywords REQUIRED_KEYWORDS]
                       [--ignored-keywords IGNORED_KEYWORDS] [-f FILE] [-u URL]
                       [-s SYMBOL] [--news-headlines] [--frequency FREQUENCY]
