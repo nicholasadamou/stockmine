@@ -39,7 +39,7 @@ class Monitor:
             self.thread = Thread(target=self.server.serve_forever)
             self.thread.daemon = True
         except KeyboardInterrupt:
-            print("%s Ctrl-c keyboard interrupt, exiting." % WARNING)
+            print(f"{WARNING} Ctrl-c keyboard interrupt, exiting.")
             sys.exit(0)
 
     def start(self):

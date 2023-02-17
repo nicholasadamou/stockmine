@@ -43,7 +43,7 @@ def scrap_yahoo_finance(ticker, follow_links=False):
 
     # add stock symbol to URL
     query_url = YAHOO_FINANCE_QUERY_URL % (ticker, ticker)
-    print("%s Yahoo Finance query: %s" % (OK, query_url))
+    print(f"{OK} Yahoo Finance query: {query_url}")
 
     latest_headlines = []
     headline_links = []
@@ -54,33 +54,32 @@ def scrap_yahoo_finance(ticker, follow_links=False):
         soup = BeautifulSoup(html, 'html.parser')
 
         headlines = soup.findAll('h3')
-        print('%s Scrapped Headlines: %s' % (OK, headlines))
+        print(f'{OK} Scrapped Headlines: {headlines}')
 
         links = soup.findAll('a')
-        print('%s Scrapped Links: %s' % (OK, links))
+        print(f'{OK} Scrapped Links: {links}')
 
         if headlines:
-            for element in headlines:
-                latest_headlines.append((element.next.next.next.next, query_url))
-            print('%s Latest Headlines: %s' % (OK, latest_headlines))
+            latest_headlines.extend(
+                (element.next.next.next.next, query_url)
+                for element in headlines
+            )
+            print(f'{OK} Latest Headlines: {latest_headlines}')
 
         if follow_links:
-            print("%s Following any link and scrapping its contents" % WARNING)
+            print(f"{WARNING} Following any link and scrapping its contents")
             if links:
                 for element in links:
                     if '/news/' in element['href']:
                         link = parsed_uri.rstrip('/') + element['href']
                         headline_links.append(link)
-                print('%s Links: %s' % (OK, headline_links))
+                print(f'{OK} Links: {headline_links}')
 
         for link in headline_links:
-            for p in crawl_page_text(link):
-                latest_headlines.append((p, link))
-        print("%s Latest Headlines: %s" % (OK, latest_headlines))
+            latest_headlines.extend((p, link) for p in crawl_page_text(link))
+        print(f"{OK} Latest Headlines: {latest_headlines}")
     except requests.exceptions.RequestException as request_exception:
-        print("%s Exception: can't crawl web-site (%s)" % (ERROR, request_exception))
-        pass
-
+        print(f"{ERROR} Exception: can't crawl web-site ({request_exception})")
     return latest_headlines
 
 
@@ -88,26 +87,21 @@ def crawl_page_text(url):
     """Crawl a Yahoo Finance page for relevant text."""
 
     try:
-        print("%s Using URL: %s" % (OK, url))
+        print(f"{OK} Using URL: {url}")
 
         html = requests.get(url).text
         soup = BeautifulSoup(html, 'html.parser')
 
         paragraphs = soup.findAll('p')
-        print("%s Scrapped paragraphs: %s" % (OK, paragraphs))
+        print(f"{OK} Scrapped paragraphs: {paragraphs}")
 
         if paragraphs:
-            n = 1
-
-            for p in paragraphs:
-                if n <= MAX_PARAGRAPHS:
-                    if p.string is not None:
-                        print("%s Crawling %s" % (OK, p.string))
-                        yield p.string
-                n += 1
+            for n, p in enumerate(paragraphs, start=1):
+                if n <= MAX_PARAGRAPHS and p.string is not None:
+                    print(f"{OK} Crawling {p.string}")
+                    yield p.string
     except requests.exceptions.RequestException as re:
-        print("%s Exception: can't crawl web-site (%s)" % (ERROR, re))
-        pass
+        print(f"{ERROR} Exception: can't crawl web-site ({re})")
 
 
 def request(symbol, url):
@@ -115,12 +109,14 @@ def request(symbol, url):
 
     # Add stock symbol to URL.
     query_url = re.sub("SYMBOL", symbol, url)
-    print("%s Yahoo Finance query: %s" % (OK, query_url))
+    print(f"{OK} Yahoo Finance query: {query_url}")
 
     try:
         response = requests.get(query_url).json()
     except (requests.HTTPError, requests.ConnectionError, requests.ConnectTimeout) as request_execption:
-        print("%s Exception: Failed to retrieve data from %s because: %s" % (ERROR, query_url, request_execption))
+        print(
+            f"{ERROR} Exception: Failed to retrieve data from {query_url} because: {request_execption}"
+        )
         raise
 
     return response
@@ -155,21 +151,14 @@ def scrap_company_data(symbol):
 def scrap_company_name(symbol):
     """Scraps Yahoo Finance for a company's name pertaining to a given ticker symbol."""
 
-    # The dictionary containing the target company's name and ticker symbol.
-    data = {}
-
     # Obtain response from Yahoo Finance
     response = request(symbol=symbol, url=YAHOO_FINANCE_STOCK_NAME_QUERY_URL)
 
-    for company in response['ResultSet']['Result']:
-        if company['symbol'] == symbol:
-            # Build dictionary containing results.
-            data = {
-                'name': company['name'],
-                'symbol': company['symbol']
-            }
-
-            # Exit loop because we found the target company's name and ticker symbol.
-            break
-
-    return data
+    return next(
+        (
+            {'name': company['name'], 'symbol': company['symbol']}
+            for company in response['ResultSet']['Result']
+            if company['symbol'] == symbol
+        ),
+        {},
+    )
