@@ -16,10 +16,7 @@ class RRCache(Cache):
     def __init__(self, maxsize, choice=random.choice, getsizeof=None):
         Cache.__init__(self, maxsize, getsizeof)
         # TODO: use None as default, assing to self.choice directly?
-        if choice is random.choice:
-            self.__choice = _choice
-        else:
-            self.__choice = choice
+        self.__choice = _choice if choice is random.choice else choice
 
     @property
     def choice(self):
@@ -31,6 +28,6 @@ class RRCache(Cache):
         try:
             key = self.__choice(list(self))
         except IndexError:
-            raise KeyError('%s is empty' % self.__class__.__name__)
+            raise KeyError(f'{self.__class__.__name__} is empty')
         else:
             return (key, self.pop(key))

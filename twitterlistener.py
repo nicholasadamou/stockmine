@@ -51,7 +51,7 @@ class TwitterListener(StreamListener):
 
         self.queue = Queue()
         self.stop_event = Event()
-        print("%s Starting %s worker threads." % (OK, NUM_THREADS))
+        print(f"{OK} Starting {NUM_THREADS} worker threads.")
         self.workers = []
         for worker_id in range(NUM_THREADS):
             worker = Thread(target=self.process_queue, args=[worker_id])
@@ -64,10 +64,10 @@ class TwitterListener(StreamListener):
 
         # First stop the queue.
         if self.queue:
-            print("%s Stopping queue." % WARNING)
+            print(f"{WARNING} Stopping queue.")
             self.queue.join()
         else:
-            print("%s No queue to stop." % WARNING)
+            print(f"{WARNING} No queue to stop.")
 
         # Then stop the worker threads.
         if self.workers:
@@ -77,28 +77,27 @@ class TwitterListener(StreamListener):
                 # Block until the thread terminates.
                 worker.join()
         else:
-            print("%s No worker threads to stop." % WARNING)
+            print(f"{WARNING} No worker threads to stop.")
 
     def process_queue(self, worker_id):
         """Continuously processes tasks on the queue."""
 
-        print("%s Started worker thread: %s" % (OK, worker_id))
+        print(f"{OK} Started worker thread: {worker_id}")
         while not self.stop_event.is_set():
             try:
                 data = self.queue.get(block=True, timeout=QUEUE_TIMEOUT_S)
                 self.handle_data(data)
                 self.queue.task_done()
             except Empty:
-                print("%s Worker %s timed out on an empty queue." %
-                      (WARNING, worker_id))
+                print(f"{WARNING} Worker {worker_id} timed out on an empty queue.")
                 continue
 
-        print("%s Stopped worker thread: %s" % (WARNING, worker_id))
+        print(f"{WARNING} Stopped worker thread: {worker_id}")
 
     def on_error(self, status):
         """Handles any API errors."""
 
-        print("%s Twitter error: %s" % (ERROR, status))
+        print(f"{ERROR} Twitter error: {status}")
         self.error_status = status
         self.stop_queue()
         return False
@@ -127,10 +126,10 @@ class TwitterListener(StreamListener):
         try:
             tweet = loads(data)
         except ValueError:
-            print("%s Failed to decode JSON data: %s" % (ERROR, data))
+            print(f"{ERROR} Failed to decode JSON data: {data}")
             return
 
-        print("%s Examining tweet: %s" % (OK, tweet))
+        print(f"{OK} Examining tweet: {tweet}")
 
         # Call the callback.
         self.callback(tweet)

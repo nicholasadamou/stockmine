@@ -10,12 +10,13 @@ stockmine is released under the Apache 2.0 license. See
 LICENSE for the full license text.
 """
 
+
 GREEN = "\033[92m"
 RED = "\033[91m"
 YELLOW = "\033[93m"
 RESET = "\033[0m"
 
-WARNING = "[%s!%s]" % (YELLOW, RESET)
-ERROR = "[%sX%s]" % (RED, RESET)
-OK = "[%s+%s]" % (GREEN, RESET)
-SUCCESS = "[%s✔%s]" % (GREEN, RESET)
+WARNING = f"[{YELLOW}!{RESET}]"
+ERROR = f"[{RED}X{RESET}]"
+OK = f"[{GREEN}+{RESET}]"
+SUCCESS = f"[{GREEN}✔{RESET}]"

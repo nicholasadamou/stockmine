@@ -61,23 +61,23 @@ def make_wikidata_request(query):
     """Makes a request to the Wikidata SPARQL API."""
 
     query_url = WIKIDATA_QUERY_URL % quote_plus(query)
-    print("%s Wikidata query: %s" % (OK, query_url))
+    print(f"{OK} Wikidata query: {query_url}")
 
     response = get(query_url)
 
     try:
         response_json = response.json()
     except ValueError:
-        print("%s Failed to decode JSON response: %s" % (ERROR, response))
+        print(f"{ERROR} Failed to decode JSON response: {response}")
         return None
 
-    print("%s Wikidata response: %s" % (OK, response_json))
+    print(f"{OK} Wikidata response: {response_json}")
 
     try:
         results = response_json["results"]
         bindings = results["bindings"]
     except KeyError:
-        print("%s Malformed Wikidata response: %s" % (ERROR, response_json))
+        print(f"{ERROR} Malformed Wikidata response: {response_json}")
         return None
 
     return bindings
@@ -91,7 +91,7 @@ def get_company_data(mid):
 
     if not bindings:
         if mid:
-            print("%s No company data found for MID: %s" % (WARNING, mid))
+            print(f"{WARNING} No company data found for MID: {mid}")
         return None
 
     # Collect the data from the response.
@@ -127,9 +127,9 @@ def get_company_data(mid):
 
         # Add to the list unless we already have the same entry.
         if company not in companies:
-            print("%s Adding company data: %s" % (OK, company))
+            print(f"{OK} Adding company data: {company}")
             companies.append(company)
         else:
-            print("%s Skipping duplicate company data: %s" % (WARNING, company))
+            print(f"{WARNING} Skipping duplicate company data: {company}")
 
     return companies

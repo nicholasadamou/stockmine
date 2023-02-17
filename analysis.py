@@ -48,7 +48,7 @@ def entity_tostring(entity):
 def entities_tostring(entities):
     """Converts a list of GNL (Google Natural Language) entities to a readable string."""
 
-    return "[%s]" % ", ".join([entity_tostring(entity) for entity in entities])
+    return f'[{", ".join([entity_tostring(entity) for entity in entities])}]'
 
 
 def get_sentiment_emoji(sentiment):
@@ -63,14 +63,14 @@ def get_sentiment_emoji(sentiment):
     if sentiment < 0:
         return EMOJI_THUMBS_DOWN
 
-    print("%s Unknown sentiment: %s" % (ERROR, sentiment))
+    print(f"{ERROR} Unknown sentiment: {sentiment}")
     return EMOJI_SHRUG
 
 
 def compile_opinion_text(name, symbol, sentiment):
     """Generates an opinion on a tweet."""
 
-    return "%s %s %s" % (name, get_sentiment_emoji(sentiment), symbol)
+    return f"{name} {get_sentiment_emoji(sentiment)} {symbol}"
 
 
 def write2csv(file_name, results, targets):
@@ -98,12 +98,12 @@ class Analysis:
         """Finds any mention of companies in a tweet."""
 
         if not tweet:
-            print("%s No tweet to find companies." % WARNING)
+            print(f"{WARNING} No tweet to find companies.")
             return None
 
         text = tweet['text']
         if not text:
-            print("%s Failed to get text from tweet: %s" % (WARNING, tweet))
+            print(f"{WARNING} Failed to get text from tweet: {tweet}")
             return None
 
         # Run entity detection.
@@ -112,7 +112,7 @@ class Analysis:
             type=language.enums.Document.Type.PLAIN_TEXT,
             language="en")
         entities = self.language_client.analyze_entities(document).entities
-        print("%s Found entities: %s" % (OK, entities_tostring(entities)))
+        print(f"{OK} Found entities: {entities_tostring(entities)}")
 
         # Collect all entities which are publicly traded companies, i.e.
         # entities which have a known stock ticker symbol.
@@ -128,7 +128,7 @@ class Analysis:
                 mid = metadata["mid"]
             except KeyError:
                 if name:
-                    print("No MID found for entity: %s" % name)
+                    print(f"No MID found for entity: {name}")
                 continue
 
             company_data = get_company_data(mid)
@@ -136,9 +136,9 @@ class Analysis:
             # Skip any entity for which we can't find any company data.
             if not company_data:
                 if name and mid:
-                    print("%s No company data found for entity: %s (%s)" % (WARNING, name, mid))
+                    print(f"{WARNING} No company data found for entity: {name} ({mid})")
                 continue
-            print("%s Found company data: %s" % (OK, company_data))
+            print(f"{OK} Found company data: {company_data}")
 
             for company in company_data:
                 # Append & attach metadata associated with a company.
@@ -147,10 +147,10 @@ class Analysis:
 
                 # Add to the list unless we already have the same entry.
                 names = [existing["name"] for existing in companies]
-                if not company["name"] in names:
+                if company["name"] not in names:
                     companies.append(company)
                 else:
-                    print("%s Skipping company with duplicate name: %s" % (WARNING, company))
+                    print(f"{WARNING} Skipping company with duplicate name: {company}")
 
                 break
 
@@ -161,7 +161,7 @@ class Analysis:
         using Google Natural Language API."""
 
         if not text:
-            print("%s No sentiment for empty text." % WARNING)
+            print(f"{WARNING} No sentiment for empty text.")
             return 0
 
         document = language.types.Document(
@@ -184,12 +184,12 @@ class Analysis:
         for company in companies:
             # Extract and add a sentiment score.
             sentiment = self.extract_sentiment(company['tweet'])
-            print("%s Using sentiment for company: %s %s" % (WARNING, sentiment, company))
+            print(f"{WARNING} Using sentiment for company: {sentiment} {company}")
             results[company['symbol']] = {'sentiment': sentiment}
 
             # Should we invest in $TICKER?
             opinion = compile_opinion_text(company['name'], company['symbol'], sentiment)
-            print('%s %s' % (WARNING, opinion))
+            print(f'{WARNING} {opinion}')
             results[company['symbol']].update({'opinion': opinion})
 
         return results

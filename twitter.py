@@ -57,19 +57,17 @@ def get_tweet_link(tweet):
     """Creates the link URL to a tweet."""
 
     if not tweet:
-        print("%s No tweet to get link." % WARNING)
+        print(f"{WARNING} No tweet to get link.")
         return None
 
     try:
         screen_name = tweet['user']['screen_name']
         id_str = tweet['id_str']
     except KeyError:
-        print("%s Malformed tweet for link: %s" % (ERROR, tweet))
+        print(f"{ERROR} Malformed tweet for link: {tweet}")
         return None
 
-    link = TWEET_URL % (screen_name, id_str)
-
-    return link
+    return TWEET_URL % (screen_name, id_str)
 
 
 def get_tweet_text(tweet):
@@ -81,7 +79,7 @@ def get_tweet_text(tweet):
     try:
         return tweet['text']
     except KeyError:
-        print("%s Malformed tweet: %s" % (ERROR, tweet))
+        print(f"{ERROR} Malformed tweet: {tweet}")
         return None
 
 
@@ -90,20 +88,15 @@ def get_twitter_users_from_file(file):
 
     # Get Twitter User IDs from file.
     users = []
-    print("%s Grabbing any Twitter User IDs from file: %s" % (OK, file))
+    print(f"{OK} Grabbing any Twitter User IDs from file: {file}")
 
     try:
-        f = open(file, "rt", encoding='utf-8')
+        with open(file, "rt", encoding='utf-8') as f:
+            users.extend(user.rstrip() for user in f)
+            print(f"{OK} FOUND USERS: {users}")
 
-        for user in f.readlines():
-            users.append(user.rstrip())
-        print("%s FOUND USERS: %s" % (OK, users))
-
-        f.close()
     except (IOError, OSError) as e:
-        print("%s Exception: Error opening file %s caused by: %s" % (ERROR, file, e))
-        pass
-
+        print(f"{ERROR} Exception: Error opening file {file} caused by: {e}")
     return users
 
 
@@ -112,21 +105,17 @@ def scrap_twitter_users_from_url(url):
 
     # Get Twitter User IDs from file.
     users = []
-    print("%s Grabbing any Twitter User IDs from URL: %s" % (OK, url))
+    print(f"{OK} Grabbing any Twitter User IDs from URL: {url}")
 
     try:
-        urls = ("http://twitter.com/", "http://www.twitter.com/",
-                "https://twitter.com/", "https://www.twitter.com/")
-
         request = requests.get(url)
         html = request.text
         soup = BeautifulSoup(html, 'html.parser')
 
-        links = []
-        for link in soup.findAll('a'):
-            links.append(link.get('href'))
+        if links := [link.get('href') for link in soup.findAll('a')]:
+            urls = ("http://twitter.com/", "http://www.twitter.com/",
+                    "https://twitter.com/", "https://www.twitter.com/")
 
-        if links:
             for link in links:
 
                 # Check if twitter_url in link.
@@ -135,13 +124,11 @@ def scrap_twitter_users_from_url(url):
                 # Get Twitter user name from link and add to list.
                 if parsed_uri in urls and "=" not in link and "?" not in link:
                     user = link.split('/')[3]
-                    users.append(u'@' + user)
+                    users.append(f'@{user}')
 
-            print("%s FOUND USERS: %s" % (OK, users))
+            print(f"{OK} FOUND USERS: {users}")
     except requests.exceptions.RequestException as re:
         print("%s Requests Exception: can't crawl web-site (%s)" % re)
-        pass
-
     return users
 
 
@@ -150,11 +137,11 @@ def stream_user_feeds(twitter, stream, target, users):
 
     # Make sure we have Twitter User IDs
     if len(users) == 0:
-        print("%s No Twitter User IDs found in %s" % (ERROR, target))
+        print(f"{ERROR} No Twitter User IDs found in {target}")
         sys.exit(1)
 
     # Build Twitter User ID list by accessing the Twitter API.
-    print("%s Building Twitter User ID list from %s" % (WARNING, users))
+    print(f"{WARNING} Building Twitter User ID list from {users}")
     user_ids = []
     while True:
         for user in users:
@@ -165,14 +152,14 @@ def stream_user_feeds(twitter, stream, target, users):
                 id = int(user.id)
 
                 if id not in users:
-                    print("%s Obtained [@%s:%s]" % (OK, screen_name, id))
+                    print(f"{OK} Obtained [@{screen_name}:{id}]")
                     user_ids.append(str(id))
 
                 time.sleep(randint(0, 2))
             except TweepError as te:
                 # Sleep a bit in case Twitter suspends us.
-                print("%s Tweepy Exception: %s" % (ERROR, te))
-                print("%s Sleeping for a random amount of time and retrying." % WARNING)
+                print(f"{ERROR} Tweepy Exception: {te}")
+                print(f"{WARNING} Sleeping for a random amount of time and retrying.")
                 time.sleep(randint(1, 10))
                 continue
             except KeyboardInterrupt:
@@ -182,7 +169,7 @@ def stream_user_feeds(twitter, stream, target, users):
         break
 
     # Search for tweets containing a list of keywords.
-    print("%s Following %s Twitter FEEDs" % (WARNING, users))
+    print(f"{WARNING} Following {users} Twitter FEEDs")
     stream.filter(follow=user_ids, languages=['en'])
 
 
@@ -219,10 +206,10 @@ class Twitter:
                     required_keywords = args.required_keywords.split(',')
                     keywords.append(required_keywords)
 
-                print("%s Searching for tweets containing %s" % (WARNING, keywords))
+                print(f"{WARNING} Searching for tweets containing {keywords}")
                 twitter_stream.filter(track=keywords, languages=['en'])
             except TweepError:
-                print("%s Twitter API error %s" % (ERROR, TweepError))
+                print(f"{ERROR} Twitter API error {TweepError}")
             except KeyboardInterrupt:
                 print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
                 twitter_stream.disconnect()
@@ -234,10 +221,10 @@ class Twitter:
                 users = get_twitter_users_from_file(file)
 
                 # Stream a list of Twitter users' FEEDs.
-                print("%s Searching for tweets from %s" % (WARNING, users))
+                print(f"{WARNING} Searching for tweets from {users}")
                 stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=file, users=users)
             except TweepError:
-                print("%s Twitter API error %s" % (ERROR, TweepError))
+                print(f"{ERROR} Twitter API error {TweepError}")
             except KeyboardInterrupt:
                 print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
                 twitter_stream.disconnect()
@@ -249,10 +236,10 @@ class Twitter:
                 users = scrap_twitter_users_from_url(url)
 
                 # Stream a list of Twitter users' FEEDs.
-                print("%s Searching for tweets from %s" % (WARNING, users))
+                print(f"{WARNING} Searching for tweets from {users}")
                 stream_user_feeds(twitter=self.twitter_api, stream=twitter_stream, target=url, users=users)
             except TweepError:
-                print("%s Twitter API error %s" % (ERROR, TweepError))
+                print(f"{ERROR} Twitter API error {TweepError}")
             except KeyboardInterrupt:
                 print("\n%s Ctrl-c keyboard interrupt, exiting." % WARNING)
                 twitter_stream.disconnect()
@@ -260,8 +247,9 @@ class Twitter:
 
         # If we got here because of an API error, raise it.
         if self.twitter_listener and self.twitter_listener.get_error_status():
-            raise Exception("Twitter API error: %s" %
-                            self.twitter_listener.get_error_status())
+            raise Exception(
+                f"Twitter API error: {self.twitter_listener.get_error_status()}"
+            )
 
         return twitter_stream
 
@@ -269,7 +257,7 @@ class Twitter:
         """Stops the current stream."""
 
         if not self.twitter_listener:
-            print("%s No stream to stop." % WARNING)
+            print(f"{WARNING} No stream to stop.")
             return
 
         self.twitter_listener.stop_queue()
@@ -281,7 +269,7 @@ class Twitter:
         # Use tweet_mode=extended so we get the full text.
         status = self.twitter_api.get_status(tweet_id, tweet_mode="extended")
         if not status:
-            print("%s Bad status response: %s" % (ERROR, status))
+            print(f"{ERROR} Bad status response: {status}")
             return None
 
         # Use the raw JSON, just like the streaming API.

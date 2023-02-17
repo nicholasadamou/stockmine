@@ -89,32 +89,34 @@ class Main:
         # create tokens of words in text using NLTK.
         text_for_tokens = re.sub(r"[%|$.,!:@]|\(|\)|#|\+|(``)|('')|\?|-", "", tweet['text'])
         tokens = nltk.word_tokenize(text_for_tokens)
-        print("%s NLTK Tokens: %s" % (OK, str(tokens)))
+        print(f"{OK} NLTK Tokens: {str(tokens)}")
 
         # Skip if required NLTK tokens are not present within the tweet's body.
         if args.required_keywords:
             required_keywords = args.required_keywords.split(',')
-            if not any(token in required_keywords for token in tokens):
-                print("%s Tweet does not contain required NLTK tokens, skipping." % WARNING)
+            if all(token not in required_keywords for token in tokens):
+                print(f"{WARNING} Tweet does not contain required NLTK tokens, skipping.")
                 return
 
         # Skip if ignored NLTK tokens are present within the tweet's body.
         if args.ignored_keywords:
             ignored_keywords = args.ignored_keywords.split(',')
             if any(token in ignored_keywords for token in tokens):
-                print("%s Tweet contains an ignored NLTK token, skipping." % WARNING)
+                print(f"{WARNING} Tweet contains an ignored NLTK token, skipping.")
                 return
 
         # strip out hash-tags for language processing.
         text = re.sub(r"[#|@$]\S+", "", tweet['text']).strip()
         tweet['text'] = text
-        print('%s Strip Hash-tags from text: %s' % (OK, tweet['text']))
+        print(f"{OK} Strip Hash-tags from text: {tweet['text']}")
 
         # Find any mention of companies in tweet.
         companies = analysis.find_companies(tweet)
 
         if not companies:
-            print("%s Didn't find any mention to any known publicly traded companies." % ERROR)
+            print(
+                f"{ERROR} Didn't find any mention to any known publicly traded companies."
+            )
             return
 
         # Analyze a tweet & obtain its sentiment.
@@ -127,7 +129,7 @@ class Main:
         # Write fields to [.csv]
         fields = ['symbol', 'name', 'sentiment', 'opinion', 'tweet', 'url']
         if ",".join(fields) not in open(FILE_NAME).read():
-            print("%s fields: %s" % (OK, fields))
+            print(f"{OK} fields: {fields}")
             f.write(",".join(fields) + "\n")
 
         # Write individual rows to [.csv].
@@ -140,20 +142,20 @@ class Main:
             data = [str(e) for e in results[company['symbol']].values()]
 
             # Construct individual row.
-            row = symbol + "," + name + "," + ",".join(data) + "," + tweet + "," + url
+            row = f"{symbol},{name}," + ",".join(data) + "," + tweet + "," + url
 
             # Write row data to [.csv].
-            print("%s row: %s" % (OK, row))
+            print(f"{OK} row: {row}")
             f.write(row + "\n")
 
-        print("%s %s" % (OK, results))
+        print(f"{OK} {results}")
 
     def run_session(self, args):
         """Runs a single streaming session. Logs and cleans up after
         exceptions.
         """
 
-        print("%s Starting new session." % WARNING)
+        print(f"{WARNING} Starting new session.")
         self.twitter.start_streaming(args, self.twitter_callback)
 
     def backoff(self, tries):
@@ -177,18 +179,18 @@ class Main:
             # Remember the first time a backoff sequence starts.
             now = datetime.now()
             if tries == 0:
-                print("%s Starting first backoff sequence." % WARNING)
+                print(f"{WARNING} Starting first backoff sequence.")
                 backoff_start = now
 
             # Reset the backoff sequence if the last error was long ago.
             if (now - backoff_start).total_seconds() > BACKOFF_RESET_S:
-                print("%s Starting new backoff sequence." % OK)
+                print(f"{OK} Starting new backoff sequence.")
                 tries = 0
                 backoff_start = now
 
             # Give up after the maximum number of tries.
             if tries >= MAX_TRIES:
-                print("%s Exceeded maximum retry count." % WARNING)
+                print(f"{WARNING} Exceeded maximum retry count.")
                 break
 
             # Wait according to the progression of the backoff sequence.

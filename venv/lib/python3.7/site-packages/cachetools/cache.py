@@ -23,8 +23,8 @@ class Cache(DefaultMapping):
         if getsizeof:
             self.getsizeof = getsizeof
         if self.getsizeof is not Cache.getsizeof:
-            self.__size = dict()
-        self.__data = dict()
+            self.__size = {}
+        self.__data = {}
         self.__currsize = 0
         self.__maxsize = maxsize
 
@@ -50,10 +50,7 @@ class Cache(DefaultMapping):
         if key not in self.__data or self.__size[key] < size:
             while self.__currsize + size > maxsize:
                 self.popitem()
-        if key in self.__data:
-            diffsize = size - self.__size[key]
-        else:
-            diffsize = size
+        diffsize = size - self.__size[key] if key in self.__data else size
         self.__data[key] = value
         self.__size[key] = size
         self.__currsize += diffsize

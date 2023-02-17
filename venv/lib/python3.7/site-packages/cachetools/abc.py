@@ -24,10 +24,7 @@ class DefaultMapping(MutableMapping):
             raise KeyError(key)
 
     def get(self, key, default=None):
-        if key in self:
-            return self[key]
-        else:
-            return default
+        return self[key] if key in self else default
 
     __marker = object()
 
